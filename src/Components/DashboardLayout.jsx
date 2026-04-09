@@ -12,10 +12,25 @@ import {
   Menu,
   Send,
 } from 'lucide-react';
+import { useQuery } from '@tanstack/react-query';
+import { useAxios } from '@/Hooks/useAxios';
+import UsersCard from './Users/UsersCard';
 
 const DashboardLayout = () => {
   const [showSidebar, setShowSidebar] = useState(false);
+  const [search, setSearch] = useState('');
+  const axiosInstance = useAxios();
+  
+  const { data: users =[]} = useQuery({
+    queryKey: ['users', search],
+    enabled: !!search,
+    queryFn: async () => {
+      const res = await axiosInstance.get(`/users?name=${search}`)
+      return res.data
+    }
+  })
 
+  console.log(users);
   return (
     <div className="flex h-screen w-full bg-[#F3F4F6] md:p-6 lg:p-10 font-sans overflow-hidden">
       {/* Main Container */}
@@ -25,7 +40,7 @@ const DashboardLayout = () => {
           className={`
           ${showSidebar ? 'translate-x-0' : '-translate-x-full'} 
           lg:translate-x-0 lg:static absolute inset-y-0 left-0 z-50 
-          w-72 sm:w-80 bg-[#3B5998] flex flex-col transition-transform duration-300 ease-in-out
+          w-80 sm:w-80 bg-[#3B5998] flex flex-col transition-transform duration-300 ease-in-out
         `}
         >
           {/* Brand Header */}
@@ -76,9 +91,15 @@ const DashboardLayout = () => {
               <input
                 type="text"
                 placeholder="Search users..."
+                value={search}
+                onChange={(e)=> setSearch(e.target.value)}
                 className="w-full bg-white/10 border border-white/5 rounded-xl py-2.5 pl-10 pr-4 text-sm text-white placeholder-white/40 focus:outline-none focus:bg-white/20 transition-all"
               />
               <Search className="absolute left-3 top-3 w-4 h-4 text-white/40" />
+            </div>
+            {/* user show */}
+            <div>
+            {users.map(user => <UsersCard key={user._id} user={user}></UsersCard>)}
             </div>
           </div>
 
