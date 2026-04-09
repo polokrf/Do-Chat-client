@@ -1,10 +1,43 @@
+'use client'
 import Image from 'next/image';
 import React from 'react';
 import { UserPlus, MessageCircle } from 'lucide-react';
+import { useAxios } from '@/Hooks/useAxios';
+import { useSession } from 'next-auth/react';
+import toast from 'react-hot-toast';
 
 const UsersCard = ({ user }) => {
   // Destructure with a fallback for image to avoid crashes
-  const { name, image } = user || {};
+  const { name, image,_id } = user || {};
+  const axiosInstance = useAxios();
+  const session = useSession();
+  const { userId } = session?.data?.user;
+  if (session.status === 'loading') {
+   return <p>loading...</p>
+  }
+ 
+  const handleAddFnd = async(id) => {
+    try {
+      
+      const friendRequests = {
+        senderId: userId,
+        receiverId: id,
+        
+      };
+      const res = await axiosInstance.post('/friendRequests', friendRequests);
+      console.log(res.data)
+      if (res?.data?.insertedId) {
+        toast.success('Request Success')
+      }
+      if (res?.data?.message) {
+        toast.error(res?.data?.message);
+      }
+      
+       
+    } catch (error) {
+      console.log(error)
+    }
+  }
 
   return (
     <div className="flex items-center justify-between my-3 bg-base-100 border border-slate-100 shadow-sm hover:shadow-md transition-shadow duration-200 rounded-xl p-3">
@@ -31,6 +64,7 @@ const UsersCard = ({ user }) => {
       {/* Action Buttons */}
       <div className="flex items-center gap-2">
         <button
+          onClick={()=>handleAddFnd(_id)}
           title="Add Friend"
           className="p-2 text-slate-600 cursor-pointer hover:bg-blue-50 hover:text-blue-600 rounded-full transition-colors"
         >

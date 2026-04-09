@@ -5,10 +5,8 @@ import { signIn } from 'next-auth/react';
 
 const GoogleBtn = () => {
   const handleGoogle = async() => {
-    const res = await signIn('google', { callbackUrl: '/dashboard' });
-    if (res?.ok) {
-      toast.success('login success')
-    }
+   await signIn('google', { callbackUrl: '/dashboard' });
+    
   }
   return (
     <div>

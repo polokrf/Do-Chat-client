@@ -2,13 +2,15 @@
 import Link from 'next/link';
 import React from 'react';
 import { useForm } from 'react-hook-form';
-import { signIn } from 'next-auth/react';
+import { signIn, useSession } from 'next-auth/react';
 import toast from 'react-hot-toast';
 import GoogleBtn from './GoogleBtn';
 import { useRouter } from 'next/navigation';
 
 const Login = () => {
   const { handleSubmit, register } = useForm();
+  const session = useSession()
+  console.log(session)
   const router =useRouter()
   const handleLogin =async (loginData) => {
    try {

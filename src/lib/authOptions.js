@@ -40,8 +40,10 @@ export const authOptions = {
         image: user.image,
         authProvider: account.provider,
       };
-      const res = await axios.post('http://localhost:5000/auth/google',newUser);
-      
+      const res = await axios.post('http://localhost:5000/auth/google', newUser);
+     
+      user.role = res.data?.role;
+      user.userId = res.data?.id;
 
       return true;
     },
@@ -51,6 +53,7 @@ export const authOptions = {
     async session({ session, user, token }) {
       if (session?.user) {
         session.user.role = token?.role;
+        session.user.userId = token?.userId;
       }
 
       return session;
@@ -58,7 +61,8 @@ export const authOptions = {
     async jwt({ token, user, account, profile, isNewUser }) {
       if (user) {
         token.role = user?.role;
-        // token.image=user?.userImage
+        token.userId=user?.userId
+       
       }
       return token;
     },

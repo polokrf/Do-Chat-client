@@ -11,24 +11,34 @@ import {
   Paperclip,
   Menu,
   Send,
+  LogOut, // Added LogOut icon
 } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { useAxios } from '@/Hooks/useAxios';
 import UsersCard from './Users/UsersCard';
+import { signOut } from 'next-auth/react';
+import { useRouter } from 'next/navigation';
 
 const DashboardLayout = () => {
   const [showSidebar, setShowSidebar] = useState(false);
   const [search, setSearch] = useState('');
   const axiosInstance = useAxios();
-  
-  const { data: users =[]} = useQuery({
+  const router=useRouter()
+
+  const { data: users = [] } = useQuery({
     queryKey: ['users', search],
     enabled: !!search,
     queryFn: async () => {
-      const res = await axiosInstance.get(`/users?name=${search}`)
-      return res.data
-    }
-  })
+      const res = await axiosInstance.get(`/users?name=${search}`);
+      return res.data;
+    },
+  });
+
+  // Logout Handler (Placeholder)
+  const handleLogout = () => {
+    signOut();
+    router.push('/')
+  };
 
   console.log(users);
   return (
@@ -50,7 +60,7 @@ const DashboardLayout = () => {
                 <MessageSquare className="w-5 h-5 text-white" />
               </div>
               <span className="text-white text-xl font-bold tracking-tight">
-                ChatConnect
+                DoChat
               </span>
             </div>
             {/* Close button for mobile */}
@@ -92,14 +102,16 @@ const DashboardLayout = () => {
                 type="text"
                 placeholder="Search users..."
                 value={search}
-                onChange={(e)=> setSearch(e.target.value)}
+                onChange={e => setSearch(e.target.value)}
                 className="w-full bg-white/10 border border-white/5 rounded-xl py-2.5 pl-10 pr-4 text-sm text-white placeholder-white/40 focus:outline-none focus:bg-white/20 transition-all"
               />
               <Search className="absolute left-3 top-3 w-4 h-4 text-white/40" />
             </div>
             {/* user show */}
             <div>
-            {users.map(user => <UsersCard key={user._id} user={user}></UsersCard>)}
+              {users.map(user => (
+                <UsersCard key={user._id} user={user}></UsersCard>
+              ))}
             </div>
           </div>
 
@@ -135,6 +147,17 @@ const DashboardLayout = () => {
                 </p>
               </div>
             </div>
+          </div>
+
+          {/* Logout Button Section */}
+          <div className="px-6 py-2">
+            <button
+              onClick={handleLogout}
+              className="flex cursor-pointer items-center gap-3 w-full px-4 py-3 text-white/80 hover:text-white hover:bg-white/10 rounded-xl transition-all duration-200"
+            >
+              <LogOut className="w-5 h-5" />
+              <span className="text-sm font-medium">Logout</span>
+            </button>
           </div>
 
           {/* Message Requests Notification */}
