@@ -16,16 +16,20 @@ import {
 import { useQuery } from '@tanstack/react-query';
 import { useAxios } from '@/Hooks/useAxios';
 import UsersCard from './Users/UsersCard';
-import { signOut } from 'next-auth/react';
+import { signOut, useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
+import Image from 'next/image';
 
 const DashboardLayout = () => {
   const [showSidebar, setShowSidebar] = useState(false);
   const [search, setSearch] = useState('');
   const axiosInstance = useAxios();
-  const router=useRouter()
+  const router = useRouter()
+  const session = useSession()
+  const image=session?.data?.user?.image
+  const name=session?.data?.user?.name
 
-  const { data: users = [] } = useQuery({
+  const { data: users = [] ,isLoading} = useQuery({
     queryKey: ['users', search],
     enabled: !!search,
     queryFn: async () => {
@@ -76,15 +80,17 @@ const DashboardLayout = () => {
           <div className="px-6 mb-6">
             <div className="flex items-center gap-3">
               <div className="relative">
-                <img
-                  src="https://i.pravatar.cc/100?u=polok"
-                  alt="Polok"
-                  className="w-11 h-11 rounded-full border-2 border-white/20"
+                <Image
+                  src={image || 'hello'}
+                  alt={name}
+                  height={22}
+                  width={22}
+                  className="w-11 h-11 object-cover object-top rounded-full border-2 border-white/20"
                 />
                 <div className="absolute bottom-0 right-0 w-3 h-3 bg-[#4CAF50] border-2 border-[#3B5998] rounded-full"></div>
               </div>
               <div className="text-white">
-                <p className="font-semibold text-sm">Polok Ahmed</p>
+                <p className="font-semibold text-sm">{ name}</p>
                 <div className="flex items-center gap-1">
                   <div className="w-1.5 h-1.5 bg-[#4CAF50] rounded-full"></div>
                   <p className="text-[10px] text-white/70 uppercase tracking-widest">
@@ -110,7 +116,7 @@ const DashboardLayout = () => {
             {/* user show */}
             <div>
               {users.map(user => (
-                <UsersCard key={user._id} user={user}></UsersCard>
+                <UsersCard isLoading={isLoading} key={user._id} user={user}></UsersCard>
               ))}
             </div>
           </div>
