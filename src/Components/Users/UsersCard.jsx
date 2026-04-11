@@ -14,12 +14,17 @@ import { useAxios } from '@/Hooks/useAxios';
 import { useSession } from 'next-auth/react';
 import toast from 'react-hot-toast';
 import { useQuery } from '@tanstack/react-query';
+import Swal from 'sweetalert2';
+import { useQueryClient } from '@tanstack/react-query';
+
+
 
 const UsersCard = ({ user ,isLoading}) => {
   const { name, image, _id: targetId, email: targetEmail } = user || {};
   const axiosInstance = useAxios();
   const session = useSession();
   const { userId, email } = session?.data?.user || {};
+  const queryClient = useQueryClient();
 
   // my friend request user
   const { data: sender = [] } = useQuery({
@@ -68,6 +73,7 @@ const UsersCard = ({ user ,isLoading}) => {
       if (res?.data?.message) {
         toast.error(res?.data?.message);
       }
+      queryClient.invalidateQueries(['senderRequest']);
     } catch (error) {
       console.log(error);
     }
@@ -90,6 +96,46 @@ const UsersCard = ({ user ,isLoading}) => {
     return 'none';
   };
 
+  // friend you can delete cancel unfriend
+  const handleDelete = (id, title) => {
+    Swal.fire({
+      title: 'Are you sure?',
+      text: "You won't be able to revert this!",
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#3085d6',
+      cancelButtonColor: '#d33',
+      confirmButtonText: `Yes, ${title} it!`,
+    }).then(async(result) => {
+     try {
+          const res = await axiosInstance.delete( `/friendRequests/delete?targetId=${id}`);
+           if (result.isConfirmed)
+             Swal.fire({
+               title: `${title}!`,
+               text: `Your friend has been ${title}`,
+               icon: 'success',
+             });
+           queryClient.invalidateQueries(['senderRequest']);
+           queryClient.invalidateQueries(['received']);
+           queryClient.invalidateQueries(['friends']);
+        } catch (error) {
+          console.log(error)
+        }
+    });
+  };
+
+  // accept friend requests 
+  const handleAccept =async (id) => {
+    try {
+      const res = await axiosInstance.patch(`/friendRequests/accept`,{userId,targetId:id})
+      console.log(res)
+      toast.success(`your new friend ${name}`)
+      queryClient.invalidateQueries(['friends']);
+    } catch (error) {
+      console.log(error)
+    }
+  }
+
   const status = checkRequestStatus();
 
   if (session.status === 'loading' || isLoading) {
@@ -109,6 +155,7 @@ const UsersCard = ({ user ,isLoading}) => {
     );
   }
 
+
   return (
     <div className="group flex items-center justify-between my-3 bg-white border border-slate-200 hover:border-blue-200 shadow-sm hover:shadow-md transition-all duration-300 rounded-2xl p-3">
       {/* User Info Section */}
@@ -125,12 +172,10 @@ const UsersCard = ({ user ,isLoading}) => {
         </div>
 
         <div>
-          <h4 className="font-bold text-slate-700 text-sm md:text-base leading-tight group-hover:text-blue-600 transition-colors">
+          <h4 className="font-semibold text-slate-700 text-sm md:text-base leading-tight group-hover:text-blue-600 transition-colors">
             {name}
           </h4>
-          <p className="text-slate-400 text-[11px] font-medium flex items-center gap-1">
-            Active Now
-          </p>
+          
         </div>
       </div>
 
@@ -139,6 +184,7 @@ const UsersCard = ({ user ,isLoading}) => {
         {status === 'friend' && (
           <>
             <button
+              onClick={() => handleDelete(targetId, 'Unfriend')}
               title="Unfriend"
               className="p-2.5 cursor-pointer text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-full transition-all"
             >
@@ -154,25 +200,34 @@ const UsersCard = ({ user ,isLoading}) => {
         )}
 
         {status === 'sender' && (
-          <>
+          <div className="flex items-center ">
             <button
+              onClick={() => handleDelete(targetId, 'Cancel Request')}
               title="Cancel Request"
-              className="p-2.5 cursor-pointer text-slate-400 hover:text-orange-500 hover:bg-orange-50 rounded-full transition-all"
+              className="p-2.5  cursor-pointer text-slate-400 hover:text-orange-500 hover:bg-orange-50 rounded-full transition-all"
             >
               <XCircle size={20} />
             </button>
-          </>
+            <button
+              title="Send Message"
+              className="p-2.5 cursor-pointer text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-full transition-all"
+            >
+              <MessageCircle size={20} />
+            </button>
+          </div>
         )}
 
         {status === 'requester' && (
           <div className="flex items-center gap-1">
             <button
+              onClick={()=>handleAccept(targetId)}
               title="Accept Request"
               className="p-2.5 cursor-pointer text-green-600 hover:bg-green-50 rounded-full transition-all"
             >
               <UserCheck size={20} />
             </button>
             <button
+              onClick={() => handleDelete(targetId, 'Delete Request')}
               title="Delete Request"
               className="p-2.5 cursor-pointer text-red-400 hover:bg-red-50 rounded-full transition-all"
             >

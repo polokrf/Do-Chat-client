@@ -44,7 +44,7 @@ const DashboardLayout = () => {
     router.push('/')
   };
 
-  console.log(users);
+  
   return (
     <div className="flex h-screen w-full bg-[#F3F4F6] md:p-6 lg:p-10 font-sans overflow-hidden">
       {/* Main Container */}
@@ -81,8 +81,8 @@ const DashboardLayout = () => {
             <div className="flex items-center gap-3">
               <div className="relative">
                 <Image
-                  src={image || 'hello'}
-                  alt={name}
+                  src={image || '/default-user.png'}
+                  alt={name || 'user'}
                   height={22}
                   width={22}
                   className="w-11 h-11 object-cover object-top rounded-full border-2 border-white/20"
@@ -90,7 +90,7 @@ const DashboardLayout = () => {
                 <div className="absolute bottom-0 right-0 w-3 h-3 bg-[#4CAF50] border-2 border-[#3B5998] rounded-full"></div>
               </div>
               <div className="text-white">
-                <p className="font-semibold text-sm">{ name}</p>
+                <p className="font-semibold text-sm">{name}</p>
                 <div className="flex items-center gap-1">
                   <div className="w-1.5 h-1.5 bg-[#4CAF50] rounded-full"></div>
                   <p className="text-[10px] text-white/70 uppercase tracking-widest">
@@ -114,9 +114,13 @@ const DashboardLayout = () => {
               <Search className="absolute left-3 top-3 w-4 h-4 text-white/40" />
             </div>
             {/* user show */}
-            <div>
+            <div className={`${users.length === 0 || 'h-[300px] overflow-y-scroll'}`}>
               {users.map(user => (
-                <UsersCard isLoading={isLoading} key={user._id} user={user}></UsersCard>
+                <UsersCard
+                  isLoading={isLoading}
+                  key={user._id}
+                  user={user}
+                ></UsersCard>
               ))}
             </div>
           </div>
