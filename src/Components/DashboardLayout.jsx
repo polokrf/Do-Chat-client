@@ -19,10 +19,14 @@ import UsersCard from './Users/UsersCard';
 import { signOut, useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
+import ChatList from './Users/ChatList';
+import FriendsList from './Users/FriendsList';
+import RequestList from './Users/RequestList';
 
 const DashboardLayout = () => {
   const [showSidebar, setShowSidebar] = useState(false);
   const [search, setSearch] = useState('');
+  const [tab,setTab]=useState('chats')
   const axiosInstance = useAxios();
   const router = useRouter()
   const session = useSession()
@@ -44,6 +48,18 @@ const DashboardLayout = () => {
     router.push('/')
   };
 
+  const tabList = () => {
+    if (tab === 'chats') {
+      return <ChatList/>
+    }
+    if (tab === 'friends') {
+      return <FriendsList/>
+    }
+    if (tab === 'requests') {
+      return <RequestList/>
+    }
+  }
+  
   
   return (
     <div className="flex h-screen w-full bg-[#F3F4F6] md:p-6 lg:p-10 font-sans overflow-hidden">
@@ -92,8 +108,8 @@ const DashboardLayout = () => {
               <div className="text-white">
                 <p className="font-semibold text-sm">{name}</p>
                 <div className="flex items-center gap-1">
-                  <div className="w-1.5 h-1.5 bg-[#4CAF50] rounded-full"></div>
-                  <p className="text-[10px] text-white/70 uppercase tracking-widest">
+                  
+                  <p className="text-[10px]  text-[#4CAF50]  uppercase tracking-widest">
                     Online
                   </p>
                 </div>
@@ -114,7 +130,9 @@ const DashboardLayout = () => {
               <Search className="absolute left-3 top-3 w-4 h-4 text-white/40" />
             </div>
             {/* user show */}
-            <div className={`${users.length === 0 || 'h-[300px] overflow-y-scroll'}`}>
+            <div
+              className={`${users.length === 0 || 'h-[300px] overflow-y-auto overflow-x-auto'}`}
+            >
               {users.map(user => (
                 <UsersCard
                   isLoading={isLoading}
@@ -127,37 +145,28 @@ const DashboardLayout = () => {
 
           {/* Tabs */}
           <div className="flex px-6 space-x-6 text-sm font-medium text-white/60 mb-2 border-b border-white/10">
-            <button className="pb-3 text-white border-b-2 border-white">
+            <button
+              onClick={() => setTab('chats')}
+              className={`pb-3  cursor-pointer ${tab === 'chats' && 'text-white border-b-2 border-white'}`}
+            >
               Chats
             </button>
-            <button className="pb-3">Friends</button>
-            <button className="pb-3">Requests</button>
+            <button
+              onClick={() => setTab('friends')}
+              className={`pb-3 cursor-pointer ${tab === 'friends' && 'text-white border-b-2 border-white'}`}
+            >
+              Friends
+            </button>
+            <button
+              onClick={() => setTab('requests')}
+              className={`pb-3  cursor-pointer ${tab === 'requests' && 'text-white border-b-2 border-white'}`}
+            >
+              Requests
+            </button>
           </div>
 
-          {/* Active Chat List */}
-          <div className="flex-1 overflow-y-auto">
-            <div className="bg-white/10 px-6 py-4 flex items-center gap-3 cursor-pointer">
-              <div className="relative">
-                <img
-                  src="https://i.pravatar.cc/100?u=rahim"
-                  className="w-11 h-11 rounded-full"
-                  alt="Rahim"
-                />
-                <div className="absolute bottom-0 right-0 w-3 h-3 bg-[#4CAF50] border-2 border-[#415D9B] rounded-full"></div>
-              </div>
-              <div className="flex-1 min-w-0">
-                <div className="flex justify-between items-center">
-                  <p className="text-white font-semibold text-sm">Rahim</p>
-                  <span className="text-[10px] text-white/40 font-light">
-                    5:25 PM
-                  </span>
-                </div>
-                <p className="text-xs text-white/70 truncate">
-                  Hey, what's up?
-                </p>
-              </div>
-            </div>
-          </div>
+          {/* Active  tab menu */}
+          <div className="flex-1 overflow-y-auto">{tabList()}</div>
 
           {/* Logout Button Section */}
           <div className="px-6 py-2">
