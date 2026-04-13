@@ -44,6 +44,7 @@ const FriendListCard = ({ friend, handleDelete }) => {
         </button>
 
         <button
+          onClick={()=>setSelectChat(targetId)}
           title="Send Message"
           className="flex cursor-pointer items-center justify-center p-2 text-white bg-blue-600 hover:bg-blue-500 rounded-xl shadow-lg shadow-blue-900/20 transition-all duration-200 active:scale-95"
         >

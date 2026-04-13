@@ -41,6 +41,7 @@ const MyRequest = ({ myReq, handleDelete }) => {
           <XCircle size={20} />
         </button>
         <button
+          onClick={()=>setSelectChat(targetId)}
           title="Send Message"
           className="p-2.5 cursor-pointer text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-full transition-all"
         >

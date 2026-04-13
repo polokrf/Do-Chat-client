@@ -138,6 +138,10 @@ const UsersCard = ({ user ,isLoading}) => {
     }
   }
 
+  const handleChat = (id) => {
+    setSelectChat(id)
+  }
+
   const status = checkRequestStatus();
 
   if (session.status === 'loading' || isLoading) {
@@ -177,7 +181,6 @@ const UsersCard = ({ user ,isLoading}) => {
           <h4 className="font-semibold text-slate-700 text-sm md:text-base leading-tight group-hover:text-blue-600 transition-colors">
             {name}
           </h4>
-          
         </div>
       </div>
 
@@ -193,6 +196,7 @@ const UsersCard = ({ user ,isLoading}) => {
               <UserMinus size={20} />
             </button>
             <button
+              onClick={() => handleChat(targetId)}
               title="Send Message"
               className="p-2.5 cursor-pointer text-blue-500 bg-blue-50 hover:bg-blue-600 hover:text-white rounded-full transition-all"
             >
@@ -211,6 +215,7 @@ const UsersCard = ({ user ,isLoading}) => {
               <XCircle size={20} />
             </button>
             <button
+              onClick={() => handleChat(targetId)}
               title="Send Message"
               className="p-2.5 cursor-pointer text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-full transition-all"
             >
@@ -222,7 +227,7 @@ const UsersCard = ({ user ,isLoading}) => {
         {status === 'requester' && (
           <div className="flex items-center gap-1">
             <button
-              onClick={()=>handleAccept(targetId)}
+              onClick={() => handleAccept(targetId)}
               title="Accept Request"
               className="p-2.5 cursor-pointer text-green-600 hover:bg-green-50 rounded-full transition-all"
             >
@@ -248,6 +253,7 @@ const UsersCard = ({ user ,isLoading}) => {
               <UserPlus size={20} />
             </button>
             <button
+              onClick={() => handleChat(targetId)}
               title="Send Message"
               className="p-2.5 cursor-pointer text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-full transition-all"
             >
