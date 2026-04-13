@@ -11,7 +11,9 @@ import {
   Paperclip,
   Menu,
   Send,
-  LogOut, // Added LogOut icon
+  LogOut,
+  MessageCircle,
+  XCircle, // Added LogOut icon
 } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { useAxios } from '@/Hooks/useAxios';
@@ -133,8 +135,14 @@ const DashboardLayout = () => {
             </div>
             {/* user show */}
             <div
-              className={`${users.length === 0 || 'h-[300px] overflow-y-auto overflow-x-auto'}`}
+              className={`${users.length === 0 || 'overflow-y-auto overflow-x-auto'}`}
             >
+              <button
+                onClick={() => setSearch('')}
+                className={`${users.length > 0 ? 'block' :'hidden'} p-2 mt-1 text-white/60 hover:text-white cursor-pointer hover:bg-white/10 rounded-lg transition-all duration-200 flex items-center justify-center`}
+              >
+                <XCircle className="w-5 h-5" />
+              </button>
               {users.map(user => (
                 <UsersCard
                   isLoading={isLoading}
@@ -146,7 +154,9 @@ const DashboardLayout = () => {
           </div>
 
           {/* Tabs */}
-          <div className="flex px-6 space-x-6 text-sm font-medium text-white/60 mb-2 border-b border-white/10">
+          <div
+            className={`${users.length >= 1 ? 'hidden' : 'block'} flex px-6 space-x-6 text-sm font-medium text-white/60 mb-2 border-b border-white/10`}
+          >
             <button
               onClick={() => setTab('chats')}
               className={`pb-3  cursor-pointer ${tab === 'chats' && 'text-white border-b-2 border-white'}`}
@@ -168,25 +178,33 @@ const DashboardLayout = () => {
           </div>
 
           {/* Active  tab menu */}
-          <div className="flex-1 overflow-y-auto">{tabList()}</div>
-
-          {/* Logout Button Section */}
-          <div className="px-6 py-2">
-            <button
-              onClick={handleLogout}
-              className="flex cursor-pointer items-center gap-3 w-full px-4 py-3 text-white/80 hover:text-white hover:bg-white/10 rounded-xl transition-all duration-200"
-            >
-              <LogOut className="w-5 h-5" />
-              <span className="text-sm font-medium">Logout</span>
-            </button>
+          <div
+            className={`flex-1 overflow-y-auto ${users.length >= 1 && 'hidden'}`}
+          >
+            {tabList()}
           </div>
 
-          {/* Message Requests Notification */}
-          <div className="p-6 mt-auto border-t border-white/10 flex justify-between items-center text-white">
-            <span className="font-medium text-sm">Message Requests</span>
-            <span className="bg-[#E74C3C] text-[10px] font-bold px-2 py-0.5 rounded-full shadow-lg">
-              3
-            </span>
+          {/* message and logout btn */}
+          <div className="p-4 mt-auto border-t border-white/10 flex items-center gap-2">
+            {/* Logout Button: Expanded to take available space */}
+            <button
+              onClick={handleLogout}
+              className="flex-1 flex items-center gap-3 px-4 py-3 text-white/60 hover:text-white hover:bg-white/5 rounded-xl transition-all duration-300 group"
+            >
+              <LogOut className="w-5 h-5 opacity-70 group-hover:opacity-100 transition-opacity" />
+              <span className="text-sm font-medium">Logout</span>
+            </button>
+
+            {/* Message Notification: Icon Style */}
+            <div className="relative group">
+              <button className="p-3 cursor-pointer text-white/60 hover:text-white hover:bg-white/5 rounded-xl transition-all duration-300">
+                <MessageCircle className="w-5 h-5" />
+                {/* The Badge */}
+                <span className="absolute top-2 right-2 flex h-4 w-4 items-center justify-center bg-red-500 text-[10px] font-bold text-white rounded-full ring-2 ring-[#121212]">
+                  3
+                </span>
+              </button>
+            </div>
           </div>
         </aside>
 
@@ -199,9 +217,8 @@ const DashboardLayout = () => {
         )}
 
         {/* Main Content Area */}
-       
+
         <ChatBox setShowSidebar={setShowSidebar} />
-       
       </div>
     </div>
   );
