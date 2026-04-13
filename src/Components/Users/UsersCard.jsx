@@ -16,6 +16,7 @@ import toast from 'react-hot-toast';
 import { useQuery } from '@tanstack/react-query';
 import Swal from 'sweetalert2';
 import { useQueryClient } from '@tanstack/react-query';
+import { useChat } from '@/Context/ChatProvider';
 
 
 
@@ -23,6 +24,7 @@ const UsersCard = ({ user ,isLoading}) => {
   const { name, image, _id: targetId, email: targetEmail } = user || {};
   const axiosInstance = useAxios();
   const session = useSession();
+  const { selectChat, setSelectChat } = useChat();
   const { userId, email } = session?.data?.user || {};
   const queryClient = useQueryClient();
 

@@ -3,6 +3,8 @@ import "./globals.css";
 import Dashboard from "./dashboard/page";
 import { Toaster } from "react-hot-toast";
 import Providers from "@/Providers/Providers";
+import { ChatProvider } from "@/Context/ChatProvider";
+
 
 
 const geistSans = Geist({
@@ -29,7 +31,7 @@ export default function RootLayout({ children }) {
       <body className="min-h-full flex flex-col relative overflow-hidden">
         <div className="flex-1">
           <Providers>
-            {children}
+            <ChatProvider>{children}</ChatProvider>
           </Providers>
           <Toaster position="top-center"></Toaster>
         </div>

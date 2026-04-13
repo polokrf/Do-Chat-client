@@ -1,9 +1,11 @@
 
+import { useChat } from '@/Context/ChatProvider';
 import { MessageCircle, UserMinus } from 'lucide-react';
 import Image from 'next/image';
 import React from 'react';
 
 const FriendListCard = ({ friend, handleDelete }) => {
+  const { selectChat, setSelectChat } = useChat();
   const { image, name, _id: targetId } = friend || {};
  
 

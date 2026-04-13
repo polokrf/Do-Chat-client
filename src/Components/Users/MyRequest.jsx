@@ -1,9 +1,12 @@
+import { useChat } from '@/Context/ChatProvider';
 import { MessageCircle, XCircle } from 'lucide-react';
 import Image from 'next/image';
 import React from 'react';
 
 const MyRequest = ({ myReq, handleDelete }) => {
- const {name ,image,_id:targetId}=myReq || {}
+  const { selectChat, setSelectChat } = useChat();
+  const { name, image, _id: targetId } = myReq || {}
+  
   return (
     <div className="flex justify-between items-center bg-base-100 border border-slate-700/50 p-3 rounded-2xl  transition-all duration-300 shadow-sm group">
       {/* Left Section: Image and Name */}
