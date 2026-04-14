@@ -1,5 +1,5 @@
 'use client';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 // React Icons (Lucide) import kora hoyeche
 import {
   MessageSquare,
@@ -26,23 +26,37 @@ import FriendsList from './Users/FriendsList';
 import RequestList from './Users/RequestList';
 import { useChat } from '@/Context/ChatProvider';
 import ChatBox from './Users/ChatBox';
+import socket from '@/lib/socket';
 
 const DashboardLayout = () => {
   const [showSidebar, setShowSidebar] = useState(false);
   const [search, setSearch] = useState('');
   const [tab,setTab]=useState('chats')
   const axiosInstance = useAxios();
-  const { selectChat, setSelectChat } = useChat();
+  const { selectChat, setSelectChat} = useChat();
   const router = useRouter()
   const session = useSession()
   const image=session?.data?.user?.image
-  const name=session?.data?.user?.name
+  const name = session?.data?.user?.name
+  const userId = session?.data?.user?.userId
+  
+  useEffect(() => {
+    socket.connect();
+  }, []);
+  useEffect(() => {
+    if (userId && socket) {
+      // socket.connect(); 
+      socket.emit('join', userId);
+      console.log('JOIN SENT:', userId);
+    }
+  },[userId])
 
   const { data: users = [] ,isLoading} = useQuery({
     queryKey: ['users', search],
     enabled: !!search,
     queryFn: async () => {
       const res = await axiosInstance.get(`/users?name=${search}`);
+     
       return res.data;
     },
   });
@@ -104,9 +118,9 @@ const DashboardLayout = () => {
                 <Image
                   src={image || '/default-user.png'}
                   alt={name || 'user'}
-                  height={22}
-                  width={22}
-                  className="w-11 h-11 object-cover object-top rounded-full border-2 border-white/20"
+                  height={50}
+                  width={50}
+                  className="w-11 h-11 object-cover rounded-full border-2 border-white/20"
                 />
                 <div className="absolute bottom-0 right-0 w-3 h-3 bg-[#4CAF50] border-2 border-[#3B5998] rounded-full"></div>
               </div>

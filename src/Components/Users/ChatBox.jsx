@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import {
   Menu,
   Paperclip,
@@ -14,18 +14,20 @@ import { useQuery } from '@tanstack/react-query';
 import { useAxios } from '@/Hooks/useAxios';
 import { useSession } from 'next-auth/react';
 import toast from 'react-hot-toast';
+import socket from '@/lib/socket';
 
 const ChatBox = ({ setShowSidebar }) => {
-  const { selectChat, setSelectChat } = useChat();
+  const { selectChat, setSelectChat, liveChat, setLiveChat  } = useChat();
   const axiosInstance = useAxios();
-  const session = useSession();
-  const userId = session?.data?.user?.userId;
-
+  const { data: session, status } = useSession();
+  const userId = session?.user?.userId;
+ 
   const { data: chatUser = {} } = useQuery({
     queryKey: ['chatUser', selectChat],
     enabled:!!selectChat,
     queryFn: async () => {
       const res = await axiosInstance.get(`/chats/chat-user/${selectChat}`);
+     
       return res.data;
     },
   });
@@ -38,10 +40,15 @@ const ChatBox = ({ setShowSidebar }) => {
         return toast.error('message is messing');
       }
       const body = {
+        _id: Date.now().toString(),
         senderId: userId,
         receiverId: chatUser?._id,
         message,
+        createdAt: new Date(),
       };
+
+      setLiveChat(prev=>[...prev,body])
+      socket.emit('sendMessage',body);
       const res = await axiosInstance.post('/chats/send-message', body);
       e.target.reset();
     } catch (error) {
@@ -49,7 +56,7 @@ const ChatBox = ({ setShowSidebar }) => {
     }
   };
 
-  // get message 
+  // get message  server
   const { data:messages =[]} = useQuery({
     queryKey: ['getMessage', userId, chatUser?._id],
     enabled: !!userId && !!chatUser?._id,
@@ -57,12 +64,47 @@ const ChatBox = ({ setShowSidebar }) => {
       const res = await axiosInstance.get(
         `/chats/messages?senderId=${userId}&receiverId=${chatUser?._id}`,
       );
+      
       return res.data
     }
   });
-  
 
+  useEffect(() => {
+    if (messages.length > 0) {
+      setLiveChat(messages)
+    }
+  },[messages])
+
+  // get message socket io
+  useEffect(() => {
+
+    const handleReceive = (data) => {
+      if (data.senderId === selectChat || data.receiverId === selectChat) {
+        
+         data._id= Date.now().toString(),
+        
+         setLiveChat(prev => [...prev,data]);
+       }
+     console.log(data);
+    }
+      
+    
+    socket.on('receiveMessage', handleReceive)
+
+    
+    return () => {
+      socket.off('receiveMessage',handleReceive);
+    }
+
+  
+  },[selectChat])
+  
+ 
   const { image, name } = chatUser;
+
+  if (status === 'loading') {
+    return <p>loading...</p>
+  }
 
   if (!selectChat) {
     return (
@@ -125,7 +167,7 @@ const ChatBox = ({ setShowSidebar }) => {
       </header>
       {/* Chat Messages */}
       <div className="flex-1 overflow-y-auto p-4 md:p-8 space-y-6 bg-[#F8F9FA]/50 scroll-smooth">
-        {messages.map(message => {
+        {liveChat.map(message => {
           const isMe = message?.senderId === userId;
 
           return (
