@@ -1,12 +1,12 @@
 import React, { useEffect } from 'react';
 import {
   Menu,
-  Paperclip,
+ 
   Phone,
   Send,
   Smile,
   Video,
-  MoreVertical,
+ 
 } from 'lucide-react';
 import { useChat } from '@/Context/ChatProvider';
 import Image from 'next/image';
