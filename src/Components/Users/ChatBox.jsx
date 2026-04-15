@@ -232,10 +232,10 @@ const ChatBox = ({ setShowSidebar }) => {
       </div>
 
       {/* Footer Input */}
-      <footer className="p-4 md:p-6 bg-white border-t border-gray-100 shadow-[0_-4px_10px_rgba(0,0,0,0.02)]">
+      <footer className="p-2 md:p-4 bg-white border-t border-gray-100 shadow-[0_-4px_10px_rgba(0,0,0,0.02)]">
         <form
           onSubmit={handleMessage}
-          className="max-w-6xl mx-auto flex items-center gap-3 bg-gray-50 border border-gray-200 rounded-2xl px-4 py-2 transition-all focus-within:border-blue-300 focus-within:bg-white focus-within:shadow-md"
+          className="w-full md:max-w-6xl mx-auto flex items-center gap-3 bg-gray-50 border border-gray-200 rounded-2xl px-4 py-2 transition-all focus-within:border-blue-300 focus-within:bg-white focus-within:shadow-md"
         >
           <button
             type="button"
@@ -252,14 +252,9 @@ const ChatBox = ({ setShowSidebar }) => {
             className="flex-1 bg-transparent py-2.5 px-2 text-sm focus:outline-none text-gray-700"
           />
 
-          {/* <button
-            type="button"
-            className=" block md:hidden p-3 rounded-xl bg-blue-600 text-white hover:text-blue-500 transition-colors cursor-pointer"
-          >
-            <Send className="w-4 h-4 group-hover:translate-x-1 group-hover:-translate-y-0.5 transition-transform" />
-          </button> */}
+         
 
-          <button className="  bg-blue-600 text-white cursor-pointer px-4 md:px-6 py-3 rounded-xl font-bold text-sm shadow-lg shadow-blue-200 hover:bg-blue-700 active:scale-95 transition-all flex items-center gap-2 group">
+          <button className="  bg-blue-600 text-white cursor-pointer px-2 md:px-6 py-3 rounded-xl font-bold text-sm shadow-lg shadow-blue-200 hover:bg-blue-700 active:scale-95 transition-all md:flex items-center gap-2 group">
             <span className=' hidden md:block'>Send</span>
             <Send className="w-4 h-4 group-hover:translate-x-1 group-hover:-translate-y-0.5 transition-transform" />
           </button>
