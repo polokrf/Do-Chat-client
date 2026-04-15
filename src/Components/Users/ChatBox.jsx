@@ -252,17 +252,15 @@ const ChatBox = ({ setShowSidebar }) => {
             className="flex-1 bg-transparent py-2.5 px-2 text-sm focus:outline-none text-gray-700"
           />
 
-          <div className="flex items-center gap-1 border-r border-gray-300 pr-2">
-            <button
-              type="button"
-              className="p-2 text-gray-400 hover:text-blue-500 transition-colors cursor-pointer"
-            >
-              <Paperclip className="w-5 h-5" />
-            </button>
-          </div>
+          {/* <button
+            type="button"
+            className=" block md:hidden p-3 rounded-xl bg-blue-600 text-white hover:text-blue-500 transition-colors cursor-pointer"
+          >
+            <Send className="w-4 h-4 group-hover:translate-x-1 group-hover:-translate-y-0.5 transition-transform" />
+          </button> */}
 
-          <button className="bg-blue-600 text-white cursor-pointer px-6 py-3 rounded-xl font-bold text-sm shadow-lg shadow-blue-200 hover:bg-blue-700 active:scale-95 transition-all flex items-center gap-2 group">
-            <span>Send</span>
+          <button className="  bg-blue-600 text-white cursor-pointer px-4 md:px-6 py-3 rounded-xl font-bold text-sm shadow-lg shadow-blue-200 hover:bg-blue-700 active:scale-95 transition-all flex items-center gap-2 group">
+            <span className=' hidden md:block'>Send</span>
             <Send className="w-4 h-4 group-hover:translate-x-1 group-hover:-translate-y-0.5 transition-transform" />
           </button>
         </form>
