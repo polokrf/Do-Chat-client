@@ -8,7 +8,7 @@ export const authOptions = {
       async authorize(credentials, req) {
         try {
           const res = await axios.post(
-            'http://localhost:5000/auth/login',
+            'https://do-chat-server.onrender.com/auth/login',
             credentials,
           );
           const user = res.data;
@@ -40,7 +40,7 @@ export const authOptions = {
         image: user.image,
         authProvider: account.provider,
       };
-      const res = await axios.post('http://localhost:5000/auth/google', newUser);
+      const res = await axios.post('https://do-chat-server.onrender.com/auth/google', newUser);
      
       user.role = res.data?.role;
       user.userId = res.data?.id;
