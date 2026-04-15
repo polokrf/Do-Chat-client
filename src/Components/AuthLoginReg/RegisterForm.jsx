@@ -62,7 +62,7 @@ const RegisterForm = () => {
   }
   return (
     <div>
-      <form onSubmit={handleSubmit(handleRegister)} className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-5">
+      <form onSubmit={handleSubmit(handleRegister)} className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-5  ">
         <div className="form-control w-full md:col-span-2">
           <label className="label text-sm font-bold text-slate-600">
             Full Name

@@ -5,11 +5,11 @@ import React from 'react';
 const Register = () => {
   
   return (
-    <div className="relative min-h-screen font-sans antialiased overflow-hidden">
+    <div className="relative min-h-screen font-sans antialiased overflow-hidden ">
       {/* Overlay: Register Card (Upore thakbe) */}
       <div className="absolute inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm overflow-y-auto">
         {/* Main Card */}
-        <div className="bg-white w-full max-w-[950px] min-h-screen md:min-h-[600px] md:rounded-[2rem] shadow-2xl overflow-hidden flex flex-col md:flex-row border border-white/20 my-auto">
+        <div className="bg-white w-full max-w-[950px] min-h-screen md:min-h-[600px] md:rounded-[2rem] shadow-2xl overflow-hidden flex flex-col md:flex-row border border-white/20 my-auto rounded-xl">
           {/* Left Side: Brand/Welcome Section */}
           <div className="w-full md:w-[40%] bg-[#3B5998] p-8 md:p-12 text-white flex flex-col justify-center relative overflow-hidden shrink-0">
             <div className="absolute -top-10 -left-10 w-32 h-32 md:w-40 md:h-40 bg-white/10 rounded-full blur-3xl"></div>
@@ -46,7 +46,7 @@ const Register = () => {
           </div>
 
           {/* Right Side: Form Section */}
-          <div className="w-full md:w-[60%] bg-white p-6 sm:p-8 md:p-12">
+          <div className="w-full md:w-[60%] bg-white p-6 sm:p-8 md:p-12 ">
             <div className="mb-6 md:mb-8">
               <h2 className="text-2xl md:text-3xl font-bold text-slate-800">
                 Get Started
@@ -56,7 +56,7 @@ const Register = () => {
               </p>
             </div>
 
-          <RegisterForm></RegisterForm>
+            <RegisterForm></RegisterForm>
           </div>
         </div>
       </div>
