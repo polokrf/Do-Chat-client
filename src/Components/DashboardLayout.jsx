@@ -40,15 +40,18 @@ const DashboardLayout = () => {
   const name = session?.data?.user?.name
   const userId = session?.data?.user?.userId
   
+
   useEffect(() => {
-    socket.connect();
-  }, []);
-  useEffect(() => {
-    if (userId && socket) {
-      // socket.connect(); 
+   
+     if (!userId) return;
+      socket.connect(); 
       socket.emit('join', userId);
-      console.log('JOIN SENT:', userId);
+    console.log('JOIN SENT:', userId);
+    
+    return () => {
+      socket.disconnect();
     }
+    
   },[userId])
 
   const { data: users = [] ,isLoading} = useQuery({

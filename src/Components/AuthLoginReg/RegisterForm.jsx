@@ -29,8 +29,7 @@ const RegisterForm = () => {
       const imgBBURL = process.env.NEXT_PUBLIC_IMGBB_API_URL;
      axios.post(imgBBURL, formData).then(imgURl => {
         const imageUrl = imgURl.data.data.url
-        axiosInstance
-          .post('/auth/register', {
+        axiosInstance.post('/auth/register', {
             ...data,
             image: imageUrl,
             authProvider: 'credentials',

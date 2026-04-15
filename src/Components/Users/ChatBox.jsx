@@ -32,29 +32,7 @@ const ChatBox = ({ setShowSidebar }) => {
     },
   });
 
-  const handleMessage = async e => {
-    e.preventDefault();
-    try {
-      const message = e.target.message.value;
-      if (!message) {
-        return toast.error('message is messing');
-      }
-      const body = {
-        _id: Date.now().toString(),
-        senderId: userId,
-        receiverId: chatUser?._id,
-        message,
-        createdAt: new Date(),
-      };
 
-      setLiveChat(prev=>[...prev,body])
-      socket.emit('sendMessage',body);
-      const res = await axiosInstance.post('/chats/send-message', body);
-      e.target.reset();
-    } catch (error) {
-      console.log(error);
-    }
-  };
 
   // get message  server
   const { data:messages =[]} = useQuery({
@@ -70,20 +48,18 @@ const ChatBox = ({ setShowSidebar }) => {
   });
 
   useEffect(() => {
-    if (messages.length > 0) {
-      setLiveChat(messages)
-    }
-  },[messages])
-
+    setLiveChat(messages || []);
+  }, [JSON.stringify(messages)]);
+ 
+ 
   // get message socket io
   useEffect(() => {
 
     const handleReceive = (data) => {
-      if (data.senderId === selectChat || data.receiverId === selectChat) {
+      if (data.senderId === selectChat) {
         
          data._id= Date.now().toString(),
-        
-         setLiveChat(prev => [...prev,data]);
+        setLiveChat(prev => [...prev,data]);
        }
      console.log(data);
     }
@@ -97,7 +73,30 @@ const ChatBox = ({ setShowSidebar }) => {
     }
 
   
-  },[selectChat])
+  }, [selectChat])
+  
+
+    const handleMessage = async e => {
+      e.preventDefault();
+      try {
+        const message = e.target.message.value;
+        if (!message) {
+          return toast.error('message is messing');
+        }
+        const body = {
+          senderId: userId,
+          receiverId: chatUser?._id,
+          message,
+        };
+
+        socket.emit('sendMessage', body);
+        const res = await axiosInstance.post('/chats/send-message', body);
+        setLiveChat(prev => [...prev, res.data]);
+        e.target.reset();
+      } catch (error) {
+        console.log(error);
+      }
+    };
   
  
   const { image, name } = chatUser;
@@ -108,14 +107,27 @@ const ChatBox = ({ setShowSidebar }) => {
 
   if (!selectChat) {
     return (
-      <div className="flex-1 flex flex-col items-center justify-center bg-[#F8F9FA] text-gray-400">
-        <div className="p-6 bg-white rounded-2xl shadow-sm border border-gray-100 flex flex-col items-center">
-          <div className="w-16 h-16 bg-blue-50 rounded-full flex items-center justify-center mb-4">
-            <Send className="w-8 h-8 text-blue-500 opacity-50" />
+      <div className="flex-1 flex flex-col min-w-0">
+        {/*  Mobile এ Menu button */}
+        <header className="h-16 border-b bg-white flex items-center px-4 lg:hidden">
+          <button
+            onClick={() => setShowSidebar(true)}
+            className="p-2 text-gray-500 hover:bg-gray-100 rounded-xl cursor-pointer transition-colors"
+          >
+            <Menu className="w-6 h-6" />
+          </button>
+        </header>
+
+        {/* Empty state */}
+        <div className="flex-1 flex flex-col items-center justify-center bg-[#F8F9FA] text-gray-400">
+          <div className="p-6 bg-white rounded-2xl shadow-sm border border-gray-100 flex flex-col items-center">
+            <div className="w-16 h-16 bg-blue-50 rounded-full flex items-center justify-center mb-4">
+              <Send className="w-8 h-8 text-blue-500 opacity-50" />
+            </div>
+            <p className="font-medium">
+              Please select a chat member to start messaging
+            </p>
           </div>
-          <p className="font-medium">
-            Please select a chat member to start messaging
-          </p>
         </div>
       </div>
     );
