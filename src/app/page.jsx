@@ -1,26 +1,26 @@
-import Login from '@/Components/AuthLoginReg/Login';
-import { authOptions } from '@/lib/authOptions';
-import { getServerSession } from 'next-auth';
-import { redirect } from 'next/navigation';
-
+import Login from "@/Components/AuthLoginReg/Login";
+import { authOptions } from "@/lib/authOptions";
+import { getServerSession } from "next-auth";
 
 export default async function Home() {
   const session = await getServerSession(authOptions);
-  
+
   if (session?.user?.email && session?.user?.role === 'user') {
-    redirect('/dashboard')
+    redirect('/dashboard');
   }
-  
+
   return (
-    <div className="relative min-h-screen font-sans antialiased bg-[#f0f2f5]">
+    <div className="relative min-h-screen font-sans antialiased bg-[#f0f2f5] overflow-x-hidden">
       {/* Overlay Login Card */}
-      <div className="min-h-screen w-full flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm z-50 fixed inset-0 overflow-y-auto">
-        <Login></Login>
+      <div className="absolute inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm overflow-y-auto">
+        <div className="my-auto w-full flex justify-center py-8">
+          <Login />
+        </div>
       </div>
 
-      {/* Background Skeleton Dashboard (Blurred) */}
-      <div className="hidden md:flex h-screen filter blur-[4px] select-none pointer-events-none">
-        {/* Sidebar */}
+      {/* Background Skeleton Dashboard */}
+      <div className="flex h-screen filter blur-[4px] select-none pointer-events-none">
+        {/* Sidebar - Desktop Only */}
         <aside className="w-80 bg-white border-r border-slate-200 hidden lg:flex flex-col">
           <div className="p-6 border-b border-slate-100 flex items-center gap-3">
             <div className="w-10 h-10 bg-slate-200 rounded-xl animate-pulse"></div>
@@ -39,7 +39,7 @@ export default async function Home() {
           </div>
         </aside>
 
-        {/* Chat Area */}
+        {/* Chat Area Skeleton */}
         <div className="flex-1 flex flex-col">
           <header className="h-20 bg-white border-b border-slate-200 px-8 flex items-center justify-between">
             <div className="flex items-center gap-4">
@@ -51,13 +51,6 @@ export default async function Home() {
             <div className="flex gap-4">
               <div className="w-10 h-10 bg-slate-200 rounded-full"></div>
               <div className="w-64 h-20 bg-slate-100 rounded-2xl"></div>
-            </div>
-            <div className="flex gap-4 justify-end">
-              <div className="w-64 h-16 bg-[#3B5998]/10 rounded-2xl"></div>
-            </div>
-            <div className="flex gap-4">
-              <div className="w-10 h-10 bg-slate-200 rounded-full"></div>
-              <div className="w-80 h-24 bg-slate-100 rounded-2xl"></div>
             </div>
           </div>
         </div>
