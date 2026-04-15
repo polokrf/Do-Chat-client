@@ -136,8 +136,8 @@ const ChatBox = ({ setShowSidebar }) => {
   return (
     <main className="flex-1 flex flex-col min-w-0 bg-[#FDFDFD]">
       {/* Header */}
-      <header className="h-20 border-b bg-white/80 backdrop-blur-md sticky top-0 z-10 flex items-center justify-between px-4 md:px-8 shadow-sm">
-        <div className="flex items-center gap-4">
+      <header className="h-25 border-b bg-white/80 backdrop-blur-md sticky top-0 z-10 flex items-center justify-between px-4 md:px-8 shadow-sm">
+        <div className="flex flex-1 items-center gap-4">
           <button
             onClick={() => setShowSidebar(true)}
             className="lg:hidden p-2 text-gray-500 hover:bg-gray-100 rounded-xl cursor-pointer transition-colors"
@@ -145,7 +145,7 @@ const ChatBox = ({ setShowSidebar }) => {
             <Menu className="w-6 h-6" />
           </button>
           <div className="relative">
-            <div className="w-11 h-11 md:w-13 md:h-13 rounded-full p-0.5 border-2 border-blue-500/20">
+            <div className="w-11 h-full md:w-13 md:h-13 rounded-full p-0.5 border-2 border-blue-500/20">
               <Image
                 src={image || 'https://i.pravatar.cc/100?u=rahim'}
                 className="w-full h-full rounded-full object-cover"
@@ -160,11 +160,7 @@ const ChatBox = ({ setShowSidebar }) => {
             <h2 className="text-gray-800 font-bold text-base md:text-lg leading-tight">
               {name || 'User'}
             </h2>
-            <div className="flex items-center gap-1.5">
-              <p className="text-[11px] text-green-600 font-bold tracking-wider uppercase">
-                Active Now
-              </p>
-            </div>
+           
           </div>
         </div>
 
