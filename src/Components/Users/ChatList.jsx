@@ -6,26 +6,32 @@ import { useSession } from 'next-auth/react';
 import Image from 'next/image';
 import React from 'react';
 
-const ChatList = () => {
- const axiosInstance = useAxios();
+const ChatList = ({ setShowSidebar }) => {
+  const axiosInstance = useAxios();
   const session = useSession();
-   const { selectChat, setSelectChat } = useChat();
-  const userId=session?.data?.user?.userId
+  const { selectChat, setSelectChat } = useChat();
+  const userId = session?.data?.user?.userId;
   const { data: chatList = [] } = useQuery({
     queryKey: ['chat-List', userId],
     enabled: !!userId,
     queryFn: async () => {
       const res = await axiosInstance.get(`/chats/chat-list?userId=${userId}`);
-      return res.data
-    }
-  })
+      return res.data;
+    },
+  });
 
-  
+  const handleChat = (id) => {
+
+    setSelectChat(id)
+    setShowSidebar(false);
+
+  }
+
   return (
-    <div className=' p-2'>
+    <div className=" p-2 space-y-2">
       {chatList.map(chat => (
         <div
-          onClick={()=>setSelectChat(chat?._id)}
+          onClick={() => handleChat(chat?._id)}
           key={chat._id}
           className="bg-white/10 px-6 py-4 flex items-center gap-3 cursor-pointer rounded-xl"
         >
@@ -46,7 +52,9 @@ const ChatList = () => {
                 {new Date(chat.lastSeen).toDateString()}
               </span>
             </div>
-            <p className="text-xs text-white/70 truncate">{ chat?.lastMessage}</p>
+            <p className="text-xs text-white/70 truncate">
+              {chat?.lastMessage}
+            </p>
           </div>
         </div>
       ))}

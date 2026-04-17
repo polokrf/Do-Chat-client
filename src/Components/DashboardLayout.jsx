@@ -1,5 +1,5 @@
 'use client';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 // React Icons (Lucide) import kora hoyeche
 import {
   MessageSquare,
@@ -15,7 +15,7 @@ import {
   MessageCircle,
   XCircle, // Added LogOut icon
 } from 'lucide-react';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useAxios } from '@/Hooks/useAxios';
 import UsersCard from './Users/UsersCard';
 import { signOut, useSession } from 'next-auth/react';
@@ -27,6 +27,7 @@ import RequestList from './Users/RequestList';
 import { useChat } from '@/Context/ChatProvider';
 import ChatBox from './Users/ChatBox';
 import socket from '@/lib/socket';
+import MessageRequest from './Users/MessageRequest';
 
 const DashboardLayout = () => {
   const [showSidebar, setShowSidebar] = useState(false);
@@ -39,6 +40,8 @@ const DashboardLayout = () => {
   const image=session?.data?.user?.image
   const name = session?.data?.user?.name
   const userId = session?.data?.user?.userId
+  const megRef = useRef()
+  const queryClient=useQueryClient()
   
 
   useEffect(() => {
@@ -46,7 +49,7 @@ const DashboardLayout = () => {
      if (!userId) return;
       socket.connect(); 
       socket.emit('join', userId);
-    console.log('JOIN SENT:', userId);
+   
     
     return () => {
       socket.disconnect();
@@ -64,6 +67,41 @@ const DashboardLayout = () => {
     },
   });
 
+  // get message request
+  const { data: messageReq=[] } = useQuery({
+    queryKey: ['messageReq', userId],
+    enabled: !!userId,
+    queryFn: async () => {
+      const res = await axiosInstance.get(`/chats/message-request-list?userId=${userId}`);
+      return res.data
+    }
+  })
+
+ 
+
+  const handleRequestMeg = () => {
+    megRef.current.showModal();
+  }
+
+  const handleMegAcDe = async (id,action) => {
+    try {
+      const update = {
+        userId: userId,
+        requestId: id,
+        action
+      }
+      const res = await axiosInstance.patch('/chats/accept-delete', update);
+      console.log(res)
+      if (res?.data?.modifiedCount > 0 && action === 'accept') {
+        setSelectChat(id);
+      }
+      megRef.current.close()
+      queryClient.invalidateQueries(['messageReq']);
+    } catch (error) {
+      console.log(error)
+    }
+  }
+
   // Logout Handler (Placeholder)
   const handleLogout = () => {
     signOut();
@@ -72,7 +110,7 @@ const DashboardLayout = () => {
 
   const tabList = () => {
     if (tab === 'chats') {
-      return <ChatList/>
+      return <ChatList setShowSidebar={setShowSidebar} />;
     }
     if (tab === 'friends') {
       return <FriendsList/>
@@ -81,6 +119,8 @@ const DashboardLayout = () => {
       return <RequestList/>
     }
   }
+
+
   
   
   return (
@@ -156,7 +196,7 @@ const DashboardLayout = () => {
             >
               <button
                 onClick={() => setSearch('')}
-                className={`${users.length > 0 ? 'block' :'hidden'} p-2 mt-1 text-white/60 hover:text-white cursor-pointer hover:bg-white/10 rounded-lg transition-all duration-200 flex items-center justify-center`}
+                className={`${users.length > 0 ? 'block' : 'hidden'} p-2 mt-1 text-white/60 hover:text-white cursor-pointer hover:bg-white/10 rounded-lg transition-all duration-200 flex items-center justify-center`}
               >
                 <XCircle className="w-5 h-5" />
               </button>
@@ -201,7 +241,7 @@ const DashboardLayout = () => {
             {tabList()}
           </div>
 
-          {/* message and logout btn */}
+          {/* message request and logout btn */}
           <div className="p-4 mt-auto border-t border-white/10 flex items-center gap-2">
             {/* Logout Button: Expanded to take available space */}
             <button
@@ -214,13 +254,22 @@ const DashboardLayout = () => {
 
             {/* Message Notification: Icon Style */}
             <div className="relative group">
-              <button className="p-3 cursor-pointer text-white/60 hover:text-white hover:bg-white/5 rounded-xl transition-all duration-300">
+              <button
+                onClick={handleRequestMeg}
+                className="p-3 cursor-pointer text-white/60 hover:text-white hover:bg-white/5 rounded-xl transition-all duration-300"
+              >
                 <MessageCircle className="w-5 h-5" />
                 {/* The Badge */}
                 <span className="absolute top-2 right-2 flex h-4 w-4 items-center justify-center bg-red-500 text-[10px] font-bold text-white rounded-full ring-2 ring-[#121212]">
-                  3
+                 {messageReq.length}
                 </span>
               </button>
+
+              <MessageRequest
+                messageReq={messageReq}
+                megRef={megRef}
+                handleMegAcDe={handleMegAcDe}
+              ></MessageRequest>
             </div>
           </div>
         </aside>
