@@ -4,10 +4,14 @@ import { MessageCircle, UserMinus } from 'lucide-react';
 import Image from 'next/image';
 import React from 'react';
 
-const FriendListCard = ({ friend, handleDelete }) => {
+const FriendListCard = ({ friend, handleDelete, setShowSidebar }) => {
   const { selectChat, setSelectChat } = useChat();
   const { image, name, _id: targetId } = friend || {};
- 
+
+  const handleChat = id => {
+    setSelectChat(id)
+    setShowSidebar(false);
+  };
 
   return (
     <div className="flex justify-between items-center bg-base-100 border border-slate-700/50 p-3 rounded-2xl  transition-all duration-300 shadow-sm group">
@@ -44,7 +48,7 @@ const FriendListCard = ({ friend, handleDelete }) => {
         </button>
 
         <button
-          onClick={()=>setSelectChat(targetId)}
+          onClick={() => handleChat(targetId)}
           title="Send Message"
           className="flex cursor-pointer items-center justify-center p-2 text-white bg-blue-600 hover:bg-blue-500 rounded-xl shadow-lg shadow-blue-900/20 transition-all duration-200 active:scale-95"
         >

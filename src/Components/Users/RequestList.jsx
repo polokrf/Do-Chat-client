@@ -8,7 +8,7 @@ import Swal from 'sweetalert2';
 import toast from 'react-hot-toast';
 import { useChat } from '@/Context/ChatProvider';
 
-const RequestList = () => {
+const RequestList = ({ setShowSidebar }) => {
   const [requestTab, setRequestTab] = useState('user-request');
   const axiosInstance = useAxios();
   const queryClient = useQueryClient();
@@ -39,38 +39,43 @@ const RequestList = () => {
 
   const handleDelete = (id, type) => {
     Swal.fire({
-           title: 'Are you sure?',
-           text: "You won't be able to revert this!",
-           icon: 'warning',
-           showCancelButton: true,
-           confirmButtonColor: '#3085d6',
-           cancelButtonColor: '#d33',
-           confirmButtonText: `Yes, ${type} it!`,
-         }).then(async result => {
-           try {
-            const res= await axiosInstance.delete(`/friendRequests/delete?targetId=${id}`);
-             if (result.isConfirmed)
-               Swal.fire({
-                 title: type,
-                 text: `Your ${type}`,
-                 icon: 'success',
-               });
-             queryClient.invalidateQueries(['userRequest']);
-             queryClient.invalidateQueries(['myRequest']);
-           } catch (error) {
-             console.log(error);
-           }
-         });
+      title: 'Are you sure?',
+      text: "You won't be able to revert this!",
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#3085d6',
+      cancelButtonColor: '#d33',
+      confirmButtonText: `Yes, ${type} it!`,
+    }).then(async result => {
+      try {
+        const res = await axiosInstance.delete(
+          `/friendRequests/delete?targetId=${id}`,
+        );
+        if (result.isConfirmed)
+          Swal.fire({
+            title: type,
+            text: `Your ${type}`,
+            icon: 'success',
+          });
+        queryClient.invalidateQueries(['userRequest']);
+        queryClient.invalidateQueries(['myRequest']);
+      } catch (error) {
+        console.log(error);
+      }
+    });
   };
 
-  const handleAccept =async( id) => {
-   try {
-      const res = await axiosInstance.patch(`/friendRequests/accept`,{userId,targetId:id})
-      console.log(res)
-      toast.success(`your new friend`)
+  const handleAccept = async id => {
+    try {
+      const res = await axiosInstance.patch(`/friendRequests/accept`, {
+        userId,
+        targetId: id,
+      });
+      console.log(res);
+      toast.success(`your new friend`);
       queryClient.invalidateQueries(['userRequest']);
     } catch (error) {
-      console.log(error)
+      console.log(error);
     }
   };
 
@@ -138,7 +143,7 @@ const RequestList = () => {
               key={myReq._id}
               className="animate-in fade-in slide-in-from-bottom-2 duration-300"
             >
-              <MyRequest handleDelete={handleDelete} myReq={myReq} />
+              <MyRequest handleDelete={handleDelete} setShowSidebar={setShowSidebar} myReq={myReq} />
             </div>
           ))
         ) : (

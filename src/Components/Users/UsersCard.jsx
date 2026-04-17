@@ -20,7 +20,7 @@ import { useChat } from '@/Context/ChatProvider';
 
 
 
-const UsersCard = ({ user ,isLoading}) => {
+const UsersCard = ({ user, isLoading, setShowSidebar }) => {
   const { name, image, _id: targetId, email: targetEmail } = user || {};
   const axiosInstance = useAxios();
   const session = useSession();
@@ -80,7 +80,7 @@ const UsersCard = ({ user ,isLoading}) => {
       console.log(error);
     }
   };
-//  check user friend or no 
+  //  check user friend or no
   const checkRequestStatus = () => {
     const friend = friends.some(
       fri =>
@@ -108,39 +108,45 @@ const UsersCard = ({ user ,isLoading}) => {
       confirmButtonColor: '#3085d6',
       cancelButtonColor: '#d33',
       confirmButtonText: `Yes, ${title} it!`,
-    }).then(async(result) => {
-     try {
-          const res = await axiosInstance.delete( `/friendRequests/delete?targetId=${id}`);
-           if (result.isConfirmed)
-             Swal.fire({
-               title: `${title}!`,
-               text: `Your friend has been ${title}`,
-               icon: 'success',
-             });
-           queryClient.invalidateQueries(['senderRequest']);
-           queryClient.invalidateQueries(['received']);
-           queryClient.invalidateQueries(['friends']);
-        } catch (error) {
-          console.log(error)
-        }
+    }).then(async result => {
+      try {
+        const res = await axiosInstance.delete(
+          `/friendRequests/delete?targetId=${id}`,
+        );
+        if (result.isConfirmed)
+          Swal.fire({
+            title: `${title}!`,
+            text: `Your friend has been ${title}`,
+            icon: 'success',
+          });
+        queryClient.invalidateQueries(['senderRequest']);
+        queryClient.invalidateQueries(['received']);
+        queryClient.invalidateQueries(['friends']);
+      } catch (error) {
+        console.log(error);
+      }
     });
   };
 
-  // accept friend requests 
-  const handleAccept =async (id) => {
+  // accept friend requests
+  const handleAccept = async id => {
     try {
-      const res = await axiosInstance.patch(`/friendRequests/accept`,{userId,targetId:id})
-      console.log(res)
-      toast.success(`your new friend ${name}`)
+      const res = await axiosInstance.patch(`/friendRequests/accept`, {
+        userId,
+        targetId: id,
+      });
+      console.log(res);
+      toast.success(`your new friend ${name}`);
       queryClient.invalidateQueries(['friends']);
     } catch (error) {
-      console.log(error)
+      console.log(error);
     }
-  }
+  };
 
-  const handleChat = (id) => {
-    setSelectChat(id)
-  }
+  const handleChat = id => {
+    setSelectChat(id);
+    setShowSidebar(false)
+  };
 
   const status = checkRequestStatus();
 
@@ -160,7 +166,6 @@ const UsersCard = ({ user ,isLoading}) => {
       </div>
     );
   }
-
 
   return (
     <div className="group flex items-center justify-between my-3 bg-white border border-slate-200 hover:border-blue-200 shadow-sm hover:shadow-md transition-all duration-300 rounded-2xl p-3">

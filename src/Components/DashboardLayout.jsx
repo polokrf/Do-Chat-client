@@ -113,10 +113,10 @@ const DashboardLayout = () => {
       return <ChatList setShowSidebar={setShowSidebar} />;
     }
     if (tab === 'friends') {
-      return <FriendsList/>
+      return <FriendsList setShowSidebar={setShowSidebar} />;
     }
     if (tab === 'requests') {
-      return <RequestList/>
+      return <RequestList setShowSidebar={setShowSidebar} />;
     }
   }
 
@@ -204,6 +204,7 @@ const DashboardLayout = () => {
                 <UsersCard
                   isLoading={isLoading}
                   key={user._id}
+                  setShowSidebar={setShowSidebar}
                   user={user}
                 ></UsersCard>
               ))}
@@ -261,7 +262,7 @@ const DashboardLayout = () => {
                 <MessageCircle className="w-5 h-5" />
                 {/* The Badge */}
                 <span className="absolute top-2 right-2 flex h-4 w-4 items-center justify-center bg-red-500 text-[10px] font-bold text-white rounded-full ring-2 ring-[#121212]">
-                 {messageReq.length}
+                  {messageReq.length}
                 </span>
               </button>
 

@@ -3,10 +3,15 @@ import { MessageCircle, XCircle } from 'lucide-react';
 import Image from 'next/image';
 import React from 'react';
 
-const MyRequest = ({ myReq, handleDelete }) => {
+const MyRequest = ({ myReq, handleDelete, setShowSidebar }) => {
   const { selectChat, setSelectChat } = useChat();
-  const { name, image, _id: targetId } = myReq || {}
-  
+  const { name, image, _id: targetId } = myReq || {};
+
+  const handleChat = id => {
+    setSelectChat(id)
+    setShowSidebar(false);
+  };
+
   return (
     <div className="flex justify-between items-center bg-base-100 border border-slate-700/50 p-3 rounded-2xl  transition-all duration-300 shadow-sm group">
       {/* Left Section: Image and Name */}
@@ -41,7 +46,7 @@ const MyRequest = ({ myReq, handleDelete }) => {
           <XCircle size={20} />
         </button>
         <button
-          onClick={()=>setSelectChat(targetId)}
+          onClick={() => handleChat(targetId)}
           title="Send Message"
           className="p-2.5 cursor-pointer text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-full transition-all"
         >
