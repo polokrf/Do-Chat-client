@@ -136,8 +136,8 @@ const ChatBox = ({ setShowSidebar }) => {
   return (
     <main className="flex-1 flex flex-col min-w-0 bg-[#FDFDFD]">
       {/* Header */}
-      <header className="h-25 border-b bg-white/80 backdrop-blur-md sticky top-0 z-10 flex items-center justify-between px-4 md:px-8 shadow-sm">
-        <div className="flex flex-1 items-center gap-4">
+      <header className="h-25 border-b bg-white/80 backdrop-blur-md sticky top-0 z-10 flex items-center justify-between px-4 md:px-8 shadow-sm gap-2">
+        <div className="flex flex-1 items-center gap-2">
           <button
             onClick={() => setShowSidebar(true)}
             className="lg:hidden p-2 text-gray-500 hover:bg-gray-100 rounded-xl cursor-pointer transition-colors"
@@ -148,7 +148,7 @@ const ChatBox = ({ setShowSidebar }) => {
             <div className="w-11 h-full md:w-13 md:h-13 rounded-full p-0.5 border-2 border-blue-500/20">
               <Image
                 src={image || 'https://i.pravatar.cc/100?u=rahim'}
-                className="w-full h-full rounded-full object-cover"
+                className="w-11 h-11 rounded-full object-cover"
                 alt={name || 'user'}
                 height={50}
                 width={50}
@@ -157,10 +157,9 @@ const ChatBox = ({ setShowSidebar }) => {
             <div className="absolute bottom-0 right-0 w-3.5 h-3.5 bg-green-500 border-2 border-white rounded-full shadow-sm"></div>
           </div>
           <div>
-            <h2 className="text-gray-800 font-bold text-base md:text-lg leading-tight">
+            <h2 className="text-gray-800 text-xs font-bold md:text-lg leading-tight truncate md:truncate-none max-w-[80px] tracking-wide md:max-w-none">
               {name || 'User'}
             </h2>
-           
           </div>
         </div>
 
@@ -248,10 +247,8 @@ const ChatBox = ({ setShowSidebar }) => {
             className="flex-1 bg-transparent py-2.5 px-2 text-sm focus:outline-none text-gray-700"
           />
 
-         
-
           <button className="  bg-blue-600 text-white cursor-pointer px-2 md:px-6 py-3 rounded-xl font-bold text-sm shadow-lg shadow-blue-200 hover:bg-blue-700 active:scale-95 transition-all md:flex items-center gap-2 group">
-            <span className=' hidden md:block'>Send</span>
+            <span className=" hidden md:block">Send</span>
             <Send className="w-4 h-4 group-hover:translate-x-1 group-hover:-translate-y-0.5 transition-transform" />
           </button>
         </form>
