@@ -56,7 +56,7 @@ const ChatBox = ({ setShowSidebar }) => {
       initialPageParam:null
     });
 
-  
+ 
   useEffect(() => {
     if (inView && hasNextPage) {
       fetchNextPage()
@@ -64,8 +64,7 @@ const ChatBox = ({ setShowSidebar }) => {
   }, [inView, hasNextPage, fetchNextPage]);
 
   const messages = data?.pages?.flatMap(page => page.messages) || [];
-
-  
+ 
 
   useEffect(() => {
     if (!messages.length) return;
@@ -187,7 +186,12 @@ const ChatBox = ({ setShowSidebar }) => {
         </div>
       </header>
       {/* Chat Messages */}
-      <div className="flex-1 flex flex-col-reverse  overflow-y-auto p-4 md:p-8 space-y-6 bg-[#F8F9FA]/50 scroll-smooth">
+      <div className="flex-1   overflow-y-auto p-4 md:p-8 space-y-6 bg-[#F8F9FA]/50 scroll-smooth">
+        <div ref={ref} className="h-10 flex items-center justify-center w-full">
+          {isFetchingNextPage && (
+            <p className="w-6 h-6 animate-spin text-[#007BFF]">loading..</p>
+          )}
+        </div>
         {liveChat.map((message, index) => {
           const isMe = message?.senderId === userId;
 
@@ -238,12 +242,6 @@ const ChatBox = ({ setShowSidebar }) => {
             </div>
           );
         })}
-
-        <div ref={ref} className="h-10 flex items-center justify-center w-full">
-          {isFetchingNextPage && (
-            <p className="w-6 h-6 animate-spin text-[#007BFF]">loding..</p>
-          )}
-        </div>
       </div>
 
       {/* Footer Input */}

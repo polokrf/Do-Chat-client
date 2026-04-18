@@ -15,7 +15,7 @@ import {
   MessageCircle,
   XCircle, // Added LogOut icon
 } from 'lucide-react';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useInfiniteQuery, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useAxios } from '@/Hooks/useAxios';
 import UsersCard from './Users/UsersCard';
 import { signOut, useSession } from 'next-auth/react';
@@ -28,6 +28,7 @@ import { useChat } from '@/Context/ChatProvider';
 import ChatBox from './Users/ChatBox';
 import socket from '@/lib/socket';
 import MessageRequest from './Users/MessageRequest';
+import { useInView } from 'react-intersection-observer';
 
 const DashboardLayout = () => {
   const [showSidebar, setShowSidebar] = useState(false);
@@ -41,7 +42,8 @@ const DashboardLayout = () => {
   const name = session?.data?.user?.name
   const userId = session?.data?.user?.userId
   const megRef = useRef()
-  const queryClient=useQueryClient()
+  const queryClient = useQueryClient();
+  const {ref,inView}=useInView()
   
 
   useEffect(() => {
@@ -57,16 +59,30 @@ const DashboardLayout = () => {
     
   },[userId])
 
-  const { data: users = [] ,isLoading} = useQuery({
-    queryKey: ['users', search],
-    enabled: !!search,
-    queryFn: async () => {
-      const res = await axiosInstance.get(`/users?name=${search}`);
-     
-      return res.data;
-    },
-  });
+  const { data, fetchNextPage, hasNextPage, isFetchingNextPage,isLoading } =
+    useInfiniteQuery({
+      queryKey: ['users', search],
+      enabled: !!search,
+      queryFn: async ({ pageParam = null }) => {
+        const res = await axiosInstance.get(
+          `/users?name=${search}&cursor=${pageParam || ''}`,
+        );
 
+        return res.data;
+      },
+      getNextPageParam: lastPage => lastPage.nextCursor,
+      initialPageParam: null,
+    });
+
+
+  useEffect(() => {
+    if (inView && hasNextPage) {
+      fetchNextPage()
+    }
+  }, [inView, hasNextPage, fetchNextPage])
+  
+  const users = data?.pages?.flatMap(page => page.users) || [];
+  
   // get message request
   const { data: messageReq=[] } = useQuery({
     queryKey: ['messageReq', userId],
@@ -130,33 +146,32 @@ const DashboardLayout = () => {
         {/* Sidebar */}
         <aside
           className={`
-          ${showSidebar ? 'translate-x-0' : '-translate-x-full'} 
-          lg:translate-x-0 lg:static absolute inset-y-0 left-0 z-50 
-          w-80 sm:w-80 bg-[#3B5998] flex flex-col transition-transform duration-300 ease-in-out
-        `}
+      ${showSidebar ? 'translate-x-0' : '-translate-x-full'} 
+      lg:translate-x-0 lg:static absolute inset-y-0 left-0 z-50 
+      w-80 sm:w-80 bg-[#3B5998] flex flex-col transition-transform duration-300 ease-in-out
+    `}
         >
-          {/* Brand Header */}
-          <div className="p-6 flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <div className="w-9 h-9 bg-white/20 rounded-full flex items-center justify-center">
-                <MessageSquare className="w-5 h-5 text-white" />
+          {/* 1. Brand Header & Profile (Static - No Scroll) */}
+          <div className="flex-none p-6">
+            <div className="flex items-center justify-between mb-6">
+              <div className="flex items-center gap-2">
+                <div className="w-9 h-9 bg-white/20 rounded-full flex items-center justify-center">
+                  <MessageSquare className="w-5 h-5 text-white" />
+                </div>
+                <span className="text-white text-xl font-bold tracking-tight">
+                  DoChat
+                </span>
               </div>
-              <span className="text-white text-xl font-bold tracking-tight">
-                DoChat
-              </span>
+              <button
+                onClick={() => setShowSidebar(false)}
+                className="lg:hidden text-white/70"
+              >
+                <X className="w-6 h-6" />
+              </button>
             </div>
-            {/* Close button for mobile */}
-            <button
-              onClick={() => setShowSidebar(false)}
-              className="lg:hidden text-white/70 hover:text-white"
-            >
-              <X className="w-6 h-6" />
-            </button>
-          </div>
 
-          {/* User Profile */}
-          <div className="px-6 mb-6">
-            <div className="flex items-center gap-3">
+            {/* User Profile */}
+            <div className="flex items-center gap-3 mb-6">
               <div className="relative">
                 <Image
                   src={image || '/default-user.png'}
@@ -169,17 +184,13 @@ const DashboardLayout = () => {
               </div>
               <div className="text-white">
                 <p className="font-semibold text-sm">{name}</p>
-                <div className="flex items-center gap-1">
-                  <p className="text-[10px]  text-[#4CAF50]  uppercase tracking-widest">
-                    Online
-                  </p>
-                </div>
+                <p className="text-[10px] text-[#4CAF50] uppercase tracking-widest">
+                  Online
+                </p>
               </div>
             </div>
-          </div>
 
-          {/* Search Bar */}
-          <div className="px-6 mb-6">
+            {/* Search Bar Input */}
             <div className="relative">
               <input
                 type="text"
@@ -190,61 +201,76 @@ const DashboardLayout = () => {
               />
               <Search className="absolute left-3 top-3 w-4 h-4 text-white/40" />
             </div>
-            {/* user show */}
-            <div
-              className={`${users.length === 0 || 'overflow-y-auto overflow-x-auto'}`}
-            >
-              <button
-                onClick={() => setSearch('')}
-                className={`${users.length > 0 ? 'block' : 'hidden'} p-2 mt-1 text-white/60 hover:text-white cursor-pointer hover:bg-white/10 rounded-lg transition-all duration-200 flex items-center justify-center`}
-              >
-                <XCircle className="w-5 h-5" />
-              </button>
-              {users.map(user => (
-                <UsersCard
-                  isLoading={isLoading}
-                  key={user._id}
-                  setShowSidebar={setShowSidebar}
-                  user={user}
-                ></UsersCard>
-              ))}
-            </div>
           </div>
 
-          {/* Tabs */}
-          <div
-            className={`${users.length >= 1 ? 'hidden' : 'block'} flex px-6 space-x-6 text-sm font-medium text-white/60 mb-2 border-b border-white/10`}
-          >
-            <button
-              onClick={() => setTab('chats')}
-              className={`pb-3  cursor-pointer ${tab === 'chats' && 'text-white border-b-2 border-white'}`}
-            >
-              Chats
-            </button>
-            <button
-              onClick={() => setTab('friends')}
-              className={`pb-3 cursor-pointer ${tab === 'friends' && 'text-white border-b-2 border-white'}`}
-            >
-              Friends
-            </button>
-            <button
-              onClick={() => setTab('requests')}
-              className={`pb-3  cursor-pointer ${tab === 'requests' && 'text-white border-b-2 border-white'}`}
-            >
-              Requests
-            </button>
+          {/* 2. Scrollable Area (Users list OR Tabs) */}
+          <div className="flex-1 overflow-y-auto px-2 custom-scrollbar">
+            {/* --- Search Results Mode --- */}
+            {users.length > 0 ? (
+              <div className="flex flex-col">
+                <button
+                  onClick={() => setSearch('')}
+                  className="self-end p-2 mb-2 text-white/60 hover:text-white bg-white/5 rounded-lg transition-all"
+                >
+                  <XCircle className="w-5 h-5" />
+                </button>
+
+                <div className="space-y-1">
+                  {users.map(user => (
+                    <UsersCard
+                      isLoading={isLoading}
+                      key={user._id}
+                      setShowSidebar={setShowSidebar}
+                      user={user}
+                    />
+                  ))}
+                </div>
+
+                {/* The Infinite Scroll Ref  */}
+                <div
+                  ref={ref}
+                  className="h-14 flex items-center justify-center w-full"
+                >
+                  {isFetchingNextPage && (
+                    <div className="flex items-center gap-2">
+                      <div className="w-4 h-4 border-2 border-white/20 border-t-white animate-spin rounded-full"></div>
+                      <span className="text-xs text-white/60">
+                        Loading more...
+                      </span>
+                    </div>
+                  )}
+                </div>
+              </div>
+            ) : (
+              /* --- Tabs Mode (Normal Sidebar) --- */
+              <div className="flex flex-col h-full">
+                <div className="flex space-x-6 text-sm font-medium text-white/60 mb-2 border-b border-white/10">
+                  <button
+                    onClick={() => setTab('chats')}
+                    className={`pb-3 cursor-pointer ${tab === 'chats' && 'text-white border-b-2 border-white'}`}
+                  >
+                    Chats
+                  </button>
+                  <button
+                    onClick={() => setTab('friends')}
+                    className={`pb-3 cursor-pointer ${tab === 'friends' && 'text-white border-b-2 border-white'}`}
+                  >
+                    Friends
+                  </button>
+                  <button
+                    onClick={() => setTab('requests')}
+                    className={`pb-3 cursor-pointer ${tab === 'requests' && 'text-white border-b-2 border-white'}`}
+                  >
+                    Requests
+                  </button>
+                </div>
+                <div className="flex-1 py-4">{tabList()}</div>
+              </div>
+            )}
           </div>
 
-          {/* Active  tab menu */}
-          <div
-            className={`flex-1 overflow-y-auto ${users.length >= 1 && 'hidden'}`}
-          >
-            {tabList()}
-          </div>
-
-          {/* message request and logout btn */}
-          <div className="p-4 mt-auto border-t border-white/10 flex items-center gap-2">
-            {/* Logout Button: Expanded to take available space */}
+          {/* 3. Footer (Logout & Notifications) */}
+          <div className="flex-none p-4 border-t border-white/10 flex items-center gap-2">
             <button
               onClick={handleLogout}
               className="flex-1 flex items-center gap-3 px-4 py-3 text-white/60 hover:text-white hover:bg-white/5 rounded-xl transition-all duration-300 group"
@@ -253,24 +279,21 @@ const DashboardLayout = () => {
               <span className="text-sm font-medium">Logout</span>
             </button>
 
-            {/* Message Notification: Icon Style */}
             <div className="relative group">
               <button
                 onClick={handleRequestMeg}
                 className="p-3 cursor-pointer text-white/60 hover:text-white hover:bg-white/5 rounded-xl transition-all duration-300"
               >
                 <MessageCircle className="w-5 h-5" />
-                {/* The Badge */}
-                <span className="absolute top-2 right-2 flex h-4 w-4 items-center justify-center bg-red-500 text-[10px] font-bold text-white rounded-full ring-2 ring-[#121212]">
+                <span className="absolute top-2 right-2 flex h-4 w-4 items-center justify-center bg-red-500 text-[10px] font-bold text-white rounded-full ring-2 ring-[#3B5998]">
                   {messageReq.length}
                 </span>
               </button>
-
               <MessageRequest
                 messageReq={messageReq}
                 megRef={megRef}
                 handleMegAcDe={handleMegAcDe}
-              ></MessageRequest>
+              />
             </div>
           </div>
         </aside>
@@ -284,7 +307,6 @@ const DashboardLayout = () => {
         )}
 
         {/* Main Content Area */}
-
         <ChatBox setShowSidebar={setShowSidebar} />
       </div>
     </div>
