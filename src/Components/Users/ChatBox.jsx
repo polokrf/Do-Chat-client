@@ -1,4 +1,5 @@
-import React, { useEffect } from 'react';
+'use client'
+import React, { useEffect, useRef, useState } from 'react';
 import {
   Menu,
  
@@ -10,99 +11,112 @@ import {
 } from 'lucide-react';
 import { useChat } from '@/Context/ChatProvider';
 import Image from 'next/image';
-import { useQuery } from '@tanstack/react-query';
+import { useInfiniteQuery, useQuery } from '@tanstack/react-query';
 import { useAxios } from '@/Hooks/useAxios';
 import { useSession } from 'next-auth/react';
 import toast from 'react-hot-toast';
 import socket from '@/lib/socket';
+import { useInView } from 'react-intersection-observer';
 
 const ChatBox = ({ setShowSidebar }) => {
-  const { selectChat, setSelectChat, liveChat, setLiveChat  } = useChat();
+  const { selectChat, setSelectChat, liveChat, setLiveChat } = useChat();
   const axiosInstance = useAxios();
   const { data: session, status } = useSession();
   const userId = session?.user?.userId;
+  const {ref,inView}=useInView()
+  
+  
+  
+
  
+  // seleCt user  for chat
   const { data: chatUser = {} } = useQuery({
     queryKey: ['chatUser', selectChat],
-    enabled:!!selectChat,
+    enabled: !!selectChat,
     queryFn: async () => {
       const res = await axiosInstance.get(`/chats/chat-user/${selectChat}`);
-     
+
       return res.data;
     },
   });
 
-
-
   // get message  server
-  const { data:messages =[]} = useQuery({
-    queryKey: ['getMessage', userId, chatUser?._id],
-    enabled: !!userId && !!chatUser?._id,
-    queryFn: async () => {
-      const res = await axiosInstance.get(
-        `/chats/messages?senderId=${userId}&receiverId=${chatUser?._id}`,
-      );
-      
-      return res.data
+  const { data, fetchNextPage, hasNextPage, isFetchingNextPage } =
+    useInfiniteQuery({
+      queryKey: ['getMessage', userId, chatUser?._id],
+      enabled: !!userId && !!chatUser?._id,
+      queryFn: async ({ pageParam = null }) => {
+        const res = await axiosInstance.get(
+          `/chats/messages?senderId=${userId}&receiverId=${chatUser?._id}&cursor=${pageParam || ''}`,
+        );
+
+        return res.data;
+      },
+      getNextPageParam: lastPage => lastPage.nextCursor,
+      initialPageParam:null
+    });
+
+  
+  useEffect(() => {
+    if (inView && hasNextPage) {
+      fetchNextPage()
     }
-  });
+  }, [inView, hasNextPage, fetchNextPage]);
+
+  const messages = data?.pages?.flatMap(page => page.messages) || [];
+
+  
 
   useEffect(() => {
-    setLiveChat(messages || []);
-  }, [JSON.stringify(messages)]);
- 
- 
-  // get message socket io
-  useEffect(() => {
+    if (!messages.length) return;
+    
+      setLiveChat(messages || []);
+    
+   },[JSON.stringify(messages)]);
 
-    const handleReceive = (data) => {
+ // get message socket io
+  useEffect(() => {
+    const handleReceive = data => {
       if (data.senderId === selectChat) {
-        
-         data._id= Date.now().toString(),
-        setLiveChat(prev => [...prev,data]);
-       }
-     console.log(data);
-    }
-      
-    
-    socket.on('receiveMessage', handleReceive)
-
-    
-    return () => {
-      socket.off('receiveMessage',handleReceive);
-    }
-
-  
-  }, [selectChat])
-  
-
-    const handleMessage = async e => {
-      e.preventDefault();
-      try {
-        const message = e.target.message.value;
-        if (!message) {
-          return toast.error('message is messing');
-        }
-        const body = {
-          senderId: userId,
-          receiverId: chatUser?._id,
-          message,
-        };
-
-        socket.emit('sendMessage', body);
-        const res = await axiosInstance.post('/chats/send-message', body);
-        setLiveChat(prev => [...prev, res.data]);
-        e.target.reset();
-      } catch (error) {
-        console.log(error);
+        ((data._id = Date.now().toString()),
+          setLiveChat(prev => [...prev, data]));
       }
+      
     };
-  
- 
+
+    socket.on('receiveMessage', handleReceive);
+
+    return () => {
+      socket.off('receiveMessage', handleReceive);
+    };
+  }, [selectChat]);
+
+  const handleMessage = async e => {
+    e.preventDefault();
+    try {
+      const message = e.target.message.value;
+      if (!message) {
+        return toast.error('message is messing');
+      }
+      const body = {
+        senderId: userId,
+        receiverId: chatUser?._id,
+        message,
+      };
+
+      socket.emit('sendMessage', body);
+      const res = await axiosInstance.post('/chats/send-message', body);
+      setLiveChat(prev => [...prev, res.data]);
+      e.target.reset();
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
   const { image, name } = chatUser;
 
   if (status === 'loading') {
-    return <p>loading...</p>
+    return <p>loading...</p>;
   }
 
   if (!selectChat) {
@@ -134,7 +148,7 @@ const ChatBox = ({ setShowSidebar }) => {
   }
 
   return (
-    <main className="flex-1 flex flex-col min-w-0 bg-[#FDFDFD]">
+    <main className="flex-1 flex flex-col min-h-0 min-w-0 bg-[#FDFDFD]">
       {/* Header */}
       <header className="h-25 border-b bg-white/80 backdrop-blur-md sticky top-0 z-10 flex items-center justify-between px-4 md:px-8 shadow-sm gap-2">
         <div className="flex flex-1 items-center gap-2">
@@ -173,13 +187,13 @@ const ChatBox = ({ setShowSidebar }) => {
         </div>
       </header>
       {/* Chat Messages */}
-      <div className="flex-1 overflow-y-auto p-4 md:p-8 space-y-6 bg-[#F8F9FA]/50 scroll-smooth">
-        {liveChat.map(message => {
+      <div className="flex-1 flex flex-col-reverse  overflow-y-auto p-4 md:p-8 space-y-6 bg-[#F8F9FA]/50 scroll-smooth">
+        {liveChat.map((message, index) => {
           const isMe = message?.senderId === userId;
 
           return (
             <div
-              key={message?._id}
+              key={message?._id || index}
               className={`flex ${isMe ? 'justify-end' : 'justify-start'} gap-3 group`}
             >
               {/* Incoming Message Avatar (Only for receiver) */}
@@ -224,6 +238,12 @@ const ChatBox = ({ setShowSidebar }) => {
             </div>
           );
         })}
+
+        <div ref={ref} className="h-10 flex items-center justify-center w-full">
+          {isFetchingNextPage && (
+            <p className="w-6 h-6 animate-spin text-[#007BFF]">loding..</p>
+          )}
+        </div>
       </div>
 
       {/* Footer Input */}
@@ -255,6 +275,6 @@ const ChatBox = ({ setShowSidebar }) => {
       </footer>
     </main>
   );
-};
+};;
 
 export default ChatBox;
