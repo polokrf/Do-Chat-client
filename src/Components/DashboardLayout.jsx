@@ -204,7 +204,7 @@ const DashboardLayout = () => {
           </div>
 
           {/* 2. Scrollable Area (Users list OR Tabs) */}
-          <div className="flex-1 overflow-y-auto px-2 custom-scrollbar">
+          <div className="flex-1 w-full overflow-y-auto px-2 custom-scrollbar">
             {/* --- Search Results Mode --- */}
             {users.length > 0 ? (
               <div className="flex flex-col">

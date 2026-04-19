@@ -5,42 +5,48 @@ import React from 'react';
 const UserRequest = ({ req, handleDelete, handleAccept }) => {
   const {name ,image,_id:targetId}=req || {}
   return (
-    <div className="flex justify-between items-center bg-base-100 border border-slate-700/50 p-3 rounded-2xl  transition-all duration-300 shadow-sm group">
-      {/* Left Section: Image and Name */}
-      <div className="flex items-center">
-        <div className="relative mr-3">
+    <div className="bg-white border border-slate-200 rounded-xl shadow-sm my-3 overflow-hidden group transition-all duration-300 hover:border-blue-200">
+      {/* Top Section: User Info (FB Style) */}
+      <div className="p-3 flex items-center gap-3">
+        <div className="relative shrink-0">
           <Image
-            className="rounded-full w-10 h-10 object-cover object-top ring-2 ring-blue-500/20 group-hover:ring-blue-500 transition-all"
+            className="rounded-full w-12 h-12 object-cover object-top ring-2 ring-slate-50 group-hover:ring-blue-100 transition-all"
             src={image || '/polok.png'}
             alt={name || 'user'}
-            height={40}
-            width={40}
+            height={48}
+            width={48}
           />
-          {/* Online Status Badge (Decorative) */}
-          <span className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 border-2 border-[#1e293b] rounded-full"></span>
+          {/* Online Status Badge */}
+          <span className="absolute bottom-0.5 right-0.5 w-3 h-3 bg-green-500 border-2 border-white rounded-full shadow-sm"></span>
         </div>
 
-        <div>
-          <h4 className=" font-medium text-sm sm:text-base tracking-wide">
+        <div className="flex-1 min-w-0">
+          <h4 className="font-bold text-slate-900 text-[15px] truncate tracking-tight group-hover:text-blue-600 transition-colors">
             {name}
           </h4>
-          <p className="text-xs text-slate-400"> Friend</p>
+          {/* Note: Text changed from "Friend" to "Sent you a request" */}
+          <p className="text-xs text-slate-500 font-medium">
+            Sent you a request
+          </p>
         </div>
       </div>
 
-      {/* Right Section: Actions */}
-      <div className="flex items-center space-x-2">
+      {/* Bottom Section: Action Buttons (Full Width Mobile Style) */}
+      <div className="flex gap-2 p-3 pt-0">
+        {/* Accept Button - Primary Action */}
         <button
           onClick={() => handleAccept(targetId)}
           title="Accept Request"
-          className="p-2.5 cursor-pointer text-green-600 hover:bg-green-50 rounded-full transition-all"
+          className="flex-1 flex items-center justify-center py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg shadow-sm shadow-blue-100 transition-all active:scale-95"
         >
           <UserCheck size={20} />
         </button>
+
+        {/* Delete Button - Secondary Action */}
         <button
           onClick={() => handleDelete(targetId, 'Delete Request')}
           title="Delete Request"
-          className="p-2.5 cursor-pointer text-red-400 hover:bg-red-50 rounded-full transition-all"
+          className="flex-1 flex items-center justify-center py-2 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-lg transition-all active:scale-95"
         >
           <UserRoundX size={20} />
         </button>

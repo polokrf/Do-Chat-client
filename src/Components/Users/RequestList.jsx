@@ -15,7 +15,7 @@ const RequestList = ({ setShowSidebar }) => {
   const session = useSession();
   const userId = session?.data?.user?.userId;
 
-  const { data: myRequests = [] } = useQuery({
+  const { data:myRequests =[]} = useQuery({
     queryKey: ['myRequest', userId],
     enabled: !!userId,
     queryFn: async () => {
