@@ -1,6 +1,7 @@
 
 import { useChat } from '@/Context/ChatProvider';
 import { useAxios } from '@/Hooks/useAxios';
+import socket from '@/lib/socket';
 import { useInfiniteQuery, useQuery } from '@tanstack/react-query';
 import { useSession } from 'next-auth/react';
 import Image from 'next/image';
@@ -10,7 +11,7 @@ import { useInView } from 'react-intersection-observer';
 const ChatList = ({ setShowSidebar }) => {
   const axiosInstance = useAxios();
   const session = useSession();
-  const { selectChat, setSelectChat } = useChat();
+  const { selectChat, setSelectChat, isOnline } = useChat();
   const {ref,inView}=useInView()
   const userId = session?.data?.user?.userId;
   const { data,fetchNextPage,hasNextPage,isFetchingNextPage} = useInfiniteQuery({
@@ -34,6 +35,8 @@ const ChatList = ({ setShowSidebar }) => {
   
   
 
+
+
   const handleChat = (id) => {
 
     setSelectChat(id)
@@ -43,7 +46,7 @@ const ChatList = ({ setShowSidebar }) => {
 
   return (
     <div className=" p-2 space-y-2 overflow-y-auto">
-      {chatList.map((chat,i) => (
+      {chatList.map((chat, i) => (
         <div
           onClick={() => handleChat(chat?._id)}
           key={chat?._id || i}
@@ -57,7 +60,9 @@ const ChatList = ({ setShowSidebar }) => {
               height={50}
               width={50}
             />
-            <div className="absolute bottom-0 right-0 w-3 h-3 bg-[#4CAF50] border-2 border-[#415D9B] rounded-full"></div>
+            {isOnline[chat._id] === 'online' && (
+              <div className="absolute bottom-0 right-0 w-3 h-3 bg-[#4CAF50] border-2 border-[#415D9B] rounded-full"></div>
+            )}
           </div>
           <div className="flex-1 min-w-0">
             <div className="flex justify-between items-center">

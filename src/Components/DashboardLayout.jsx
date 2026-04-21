@@ -35,7 +35,7 @@ const DashboardLayout = () => {
   const [search, setSearch] = useState('');
   const [tab,setTab]=useState('chats')
   const axiosInstance = useAxios();
-  const { selectChat, setSelectChat} = useChat();
+  const { selectChat, setSelectChat,isOnline} = useChat();
   const router = useRouter()
   const session = useSession()
   const image=session?.data?.user?.image
@@ -51,7 +51,8 @@ const DashboardLayout = () => {
      if (!userId) return;
       socket.connect(); 
       socket.emit('join', userId);
-   
+
+    // console.log('connnect ',userId)
     
     return () => {
       socket.disconnect();
@@ -59,6 +60,7 @@ const DashboardLayout = () => {
     
   },[userId])
 
+  // console.log('socket connected:', socket.connected);
   const { data, fetchNextPage, hasNextPage, isFetchingNextPage,isLoading } =
     useInfiniteQuery({
       queryKey: ['users', search],
@@ -180,12 +182,14 @@ const DashboardLayout = () => {
                   width={50}
                   className="w-11 h-11 object-cover rounded-full border-2 border-white/20"
                 />
-                <div className="absolute bottom-0 right-0 w-3 h-3 bg-[#4CAF50] border-2 border-[#3B5998] rounded-full"></div>
+                {isOnline[userId] === 'online' && (
+                  <div className="absolute bottom-0 right-0 w-3 h-3 bg-[#4CAF50] border-2 border-[#3B5998] rounded-full"></div>
+                )}
               </div>
               <div className="text-white">
                 <p className="font-semibold text-sm">{name}</p>
                 <p className="text-[10px] text-[#4CAF50] uppercase tracking-widest">
-                  Online
+                  {isOnline[userId] === 'online' ? 'online' : 'offline'}
                 </p>
               </div>
             </div>
@@ -200,6 +204,17 @@ const DashboardLayout = () => {
                 className="w-full bg-white/10 border border-white/5 rounded-xl py-2.5 pl-10 pr-4 text-sm text-white placeholder-white/40 focus:outline-none focus:bg-white/20 transition-all"
               />
               <Search className="absolute left-3 top-3 w-4 h-4 text-white/40" />
+
+              <div className=' text-right'>
+                {users.length > 0 && (
+                  <button
+                    onClick={() => setSearch('')}
+                    className="self-end p-2 mt-3 cursor-pointer mb-2 text-white/60 hover:text-white bg-white/5 rounded-lg transition-all"
+                  >
+                    <XCircle className="w-5 h-5" />
+                  </button>
+                )}
+              </div>
             </div>
           </div>
 
@@ -208,13 +223,6 @@ const DashboardLayout = () => {
             {/* --- Search Results Mode --- */}
             {users.length > 0 ? (
               <div className="flex flex-col">
-                <button
-                  onClick={() => setSearch('')}
-                  className="self-end p-2 mb-2 text-white/60 hover:text-white bg-white/5 rounded-lg transition-all"
-                >
-                  <XCircle className="w-5 h-5" />
-                </button>
-
                 <div className="space-y-1">
                   {users.map(user => (
                     <UsersCard

@@ -1,8 +1,10 @@
 import Image from 'next/image';
 import React from 'react';
 import { Check, X, UserPlus } from 'lucide-react';
+import { useChat } from '@/Context/ChatProvider';
 
 const MessageRequest = ({ megRef, messageReq = [], handleMegAcDe }) => {
+  
   return (
     <dialog ref={megRef} className="modal modal-bottom sm:modal-middle">
       <div className="modal-box bg-[#001E3C] border border-blue-400/20 p-0 overflow-hidden shadow-2xl">
@@ -29,7 +31,7 @@ const MessageRequest = ({ megRef, messageReq = [], handleMegAcDe }) => {
           {messageReq.length > 0 ? (
             messageReq.map(chat => (
               <div
-                key={chat._id}
+                key={chat?._id}
                 className="flex items-center justify-between px-6 py-5 border-b border-blue-400/10 hover:bg-white/5 transition-all group"
               >
                 <div className="flex items-center gap-4 flex-1 min-w-0">
@@ -43,7 +45,7 @@ const MessageRequest = ({ megRef, messageReq = [], handleMegAcDe }) => {
                         fill
                       />
                     </div>
-                    <div className="absolute bottom-0 right-0 w-3.5 h-3.5 bg-blue-500 border-2 border-[#001E3C] rounded-full shadow-lg"></div>
+                  
                   </div>
 
                   {/* Text Content */}

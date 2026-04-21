@@ -17,9 +17,12 @@ import { useSession } from 'next-auth/react';
 import toast from 'react-hot-toast';
 import socket from '@/lib/socket';
 import { useInView } from 'react-intersection-observer';
+import Typing from './Typing';
 
 const ChatBox = ({ setShowSidebar }) => {
-  const { selectChat, setSelectChat, liveChat, setLiveChat } = useChat();
+  const { selectChat, setSelectChat, liveChat, setLiveChat, isOnline } = useChat();
+  const [typingUser, setTypingUser] = useState(null);
+
   const axiosInstance = useAxios();
   const { data: session, status } = useSession();
   const userId = session?.user?.userId;
@@ -80,7 +83,7 @@ const ChatBox = ({ setShowSidebar }) => {
         ((data._id = Date.now().toString()),
           setLiveChat(prev => [...prev, data]));
       }
-      
+      // console.log(data)
     };
 
     socket.on('receiveMessage', handleReceive);
@@ -111,8 +114,56 @@ const ChatBox = ({ setShowSidebar }) => {
       console.log(error);
     }
   };
+   
+  // typing status include
+  const typingTimeoutRef = useRef(null);
+  const handleTyping = () => {
+  
+    const data = {
+      senderId: userId,
+      receiverId:chatUser?._id
+    }
+   
+    socket.emit('typing', data)
 
-  const { image, name } = chatUser;
+    if (typingTimeoutRef.current) {
+      clearTimeout(typingTimeoutRef.current);
+      
+    }
+
+    typingTimeoutRef.current = setTimeout(() => {
+      socket.emit('stopTyping',data);
+    },1000)
+
+  }
+
+  // get typing 
+  useEffect(() => {
+
+    const handleTyping = ({ senderId }) => {
+        if (senderId === chatUser?._id) {
+          setTypingUser(senderId);
+        }
+       console.log('typing', senderId);
+    };
+    const handleTypingStop = ({ senderId }) => {
+      if (senderId === chatUser?._id) {
+        setTypingUser(null);
+      }
+       
+    };
+    socket.on('typing', handleTyping)
+    socket.on('stopTyping', handleTypingStop)
+    
+    return () => {
+        socket.off('typing', handleTyping);
+        socket.off('stopTyping', handleTypingStop);
+    }
+  },[chatUser])
+
+  const { image, name} = chatUser;
+  
+
 
   if (status === 'loading') {
     return <p>loading...</p>;
@@ -167,7 +218,9 @@ const ChatBox = ({ setShowSidebar }) => {
                 width={50}
               />
             </div>
-            <div className="absolute bottom-0 right-0 w-3.5 h-3.5 bg-green-500 border-2 border-white rounded-full shadow-sm"></div>
+            {isOnline[chatUser?._id] === 'online' && (
+              <div className="absolute bottom-0 right-0 w-3.5 h-3.5 bg-green-500 border-2 border-white rounded-full shadow-sm"></div>
+            )}
           </div>
           <div>
             <h2 className="text-gray-800 text-xs font-bold md:text-lg leading-tight truncate md:truncate-none max-w-[80px] tracking-wide md:max-w-none">
@@ -242,6 +295,10 @@ const ChatBox = ({ setShowSidebar }) => {
             </div>
           );
         })}
+
+        {typingUser === chatUser?._id && (
+         <Typing chatUser={chatUser}></Typing>
+        )}
       </div>
 
       {/* Footer Input */}
@@ -261,6 +318,7 @@ const ChatBox = ({ setShowSidebar }) => {
             required
             type="text"
             name="message"
+            onChange={handleTyping}
             placeholder="Write a message..."
             className="flex-1 bg-transparent py-2.5 px-2 text-sm focus:outline-none text-gray-700"
           />

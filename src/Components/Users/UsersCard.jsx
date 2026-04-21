@@ -62,6 +62,7 @@ const UsersCard = ({ user, isLoading, setShowSidebar }) => {
     try {
       const friendRequests = { senderId: userId, receiverId: id };
       const res = await axiosInstance.post('/friendRequests', friendRequests);
+      
       if (res?.data?.insertedId) toast.success('Request Sent!');
       if (res?.data?.message) toast.error(res?.data?.message);
       queryClient.invalidateQueries(['senderRequest']);
@@ -165,7 +166,9 @@ const UsersCard = ({ user, isLoading, setShowSidebar }) => {
             {status === 'friend' && 'Friend'}
             {status === 'sender' && 'Request Sent'}
             {status === 'requester' && 'Sent you a request'}
-            {status === 'none' && 'Suggested for you'}
+            
+            {(status === 'none' && userId !== targetId) && 'Suggested for you'}
+          
           </p>
         </div>
       </div>

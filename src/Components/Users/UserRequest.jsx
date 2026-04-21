@@ -37,7 +37,7 @@ const UserRequest = ({ req, handleDelete, handleAccept }) => {
         <button
           onClick={() => handleAccept(targetId)}
           title="Accept Request"
-          className="flex-1 flex items-center justify-center py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg shadow-sm shadow-blue-100 transition-all active:scale-95"
+          className="flex-1 flex cursor-pointer items-center justify-center py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg shadow-sm shadow-blue-100 transition-all active:scale-95"
         >
           <UserCheck size={20} />
         </button>
@@ -46,7 +46,7 @@ const UserRequest = ({ req, handleDelete, handleAccept }) => {
         <button
           onClick={() => handleDelete(targetId, 'Delete Request')}
           title="Delete Request"
-          className="flex-1 flex items-center justify-center py-2 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-lg transition-all active:scale-95"
+          className="flex-1 cursor-pointer flex items-center justify-center py-2 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-lg transition-all active:scale-95"
         >
           <UserRoundX size={20} />
         </button>

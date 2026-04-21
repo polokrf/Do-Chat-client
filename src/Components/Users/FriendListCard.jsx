@@ -5,7 +5,7 @@ import Image from 'next/image';
 import React from 'react';
 
 const FriendListCard = ({ friend, handleDelete, setShowSidebar }) => {
-  const { selectChat, setSelectChat } = useChat();
+  const { selectChat, setSelectChat,isOnline } = useChat();
   const { image, name, _id: targetId } = friend || {};
 
   const handleChat = id => {
@@ -26,7 +26,9 @@ const FriendListCard = ({ friend, handleDelete, setShowSidebar }) => {
             width={48}
           />
           {/* Online Status Badge */}
-          <span className="absolute bottom-0.5 right-0.5 w-3 h-3 bg-green-500 border-2 border-white rounded-full shadow-sm"></span>
+          {isOnline[targetId] === 'online' && (
+            <span className="absolute bottom-0.5 right-0.5 w-3 h-3 bg-green-500 border-2 border-white rounded-full shadow-sm"></span>
+          )}
         </div>
 
         <div className="flex-1 min-w-0">
@@ -43,7 +45,7 @@ const FriendListCard = ({ friend, handleDelete, setShowSidebar }) => {
         <button
           onClick={() => handleChat(targetId)}
           title="Send Message"
-          className="flex-1 flex items-center justify-center py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg shadow-sm shadow-blue-100 transition-all active:scale-95"
+          className="flex-1 cursor-pointer flex items-center justify-center py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg shadow-sm shadow-blue-100 transition-all active:scale-95"
         >
           <MessageCircle size={20} />
         </button>
@@ -52,7 +54,7 @@ const FriendListCard = ({ friend, handleDelete, setShowSidebar }) => {
         <button
           onClick={() => handleDelete(targetId, 'Unfriend')}
           title="Unfriend"
-          className="flex-1 flex items-center justify-center py-2 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-lg transition-all active:scale-95"
+          className="flex-1 cursor-pointer flex items-center justify-center py-2 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-lg transition-all active:scale-95"
         >
           <UserMinus size={20} />
         </button>
