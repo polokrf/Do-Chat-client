@@ -15,7 +15,7 @@ const RegisterForm = () => {
    const router=useRouter()
  
   
-  const handleRegister = (data) => {
+  const handleRegister = async (data) => {
     try {
       if (!data.email) {
             return 
@@ -27,16 +27,19 @@ const RegisterForm = () => {
       const formData = new FormData();
       formData.append('image',imageFile);
       const imgBBURL = process.env.NEXT_PUBLIC_IMGBB_API_URL;
-     axios.post(imgBBURL, formData).then(imgURl => {
-        const imageUrl = imgURl.data.data.url
-        axiosInstance.post('/auth/register', {
+      // hosting to imagBB
+      const resImg = await axios.post(imgBBURL, formData)
+      const imageUrl = resImg.data.data.url
+      // register user data save in data base
+      const res = await  axiosInstance.post('/auth/register', {
             ...data,
             image: imageUrl,
             authProvider: 'credentials',
           })
-          .then(async (res) => {
-            console.log(res);
-            if (res.data?.insertedId) {
+          
+      // complete  register then auto login
+         if (res.data?.insertedId) {
+            
               const resLogin = await signIn('credentials', {
                 redirect: false,
                 email: data.email,
@@ -46,18 +49,12 @@ const RegisterForm = () => {
                 toast.success('Register success');
                 router.push('/dashboard')
               }
-              console.log(resLogin)
+              // console.log(resLogin)
             }
-          })
-          .catch(error => {
-            console.log(error);
-          });
-      }).catch(err => {
-        console.log(err)
-      })
+         
       
     } catch (error) {
-      
+      console.log(error)
     }
   }
   return (

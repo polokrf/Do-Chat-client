@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import UserRequest from './UserRequest';
 import MyRequest from './MyRequest';
 import { useAxios } from '@/Hooks/useAxios';
@@ -7,6 +7,8 @@ import { useSession } from 'next-auth/react';
 import Swal from 'sweetalert2';
 import toast from 'react-hot-toast';
 import { useChat } from '@/Context/ChatProvider';
+import { usePagination } from '@/Hooks/usePagination';
+import { useInView } from 'react-intersection-observer';
 
 const RequestList = ({ setShowSidebar }) => {
   const [requestTab, setRequestTab] = useState('user-request');
@@ -14,28 +16,64 @@ const RequestList = ({ setShowSidebar }) => {
   const queryClient = useQueryClient();
   const session = useSession();
   const userId = session?.data?.user?.userId;
+  const { ref, inView}=useInView()
 
-  const { data:myRequests =[]} = useQuery({
-    queryKey: ['myRequest', userId],
-    enabled: !!userId,
-    queryFn: async () => {
-      const res = await axiosInstance.get(
-        `/requests/my-request?userId=${userId}`,
-      );
-      return res.data;
-    },
-  });
+  // const { data:myRequests =[]} = useQuery({
+  //   queryKey: ['myRequest', userId],
+  //   enabled: !!userId,
+  //   queryFn: async () => {
+  //     const res = await axiosInstance.get(
+  //       `/requests/my-request?userId=${userId}`,
+  //     );
+  //     return res.data;
+  //   },
+  // });
 
-  const { data: userRequests = [] } = useQuery({
-    queryKey: ['userRequest', userId],
-    enabled: !!userId,
-    queryFn: async () => {
-      const res = await axiosInstance.get(
-        `/requests/user-request?userId=${userId}`,
-      );
-      return res.data;
-    },
-  });
+  // const { data: userRequests = [] } = useQuery({
+  //   queryKey: ['userRequest', userId],
+  //   enabled: !!userId,
+  //   queryFn: async () => {
+  //     const res = await axiosInstance.get(
+  //       `/requests/user-request?userId=${userId}`,
+  //     );
+  //     return res.data;
+  //   },
+  // });
+
+  // set pagination and get data use tanStack Query
+
+  const {
+    data: sentRequest =[],
+    fetchNextPage: myNextPage,
+    hasNextPage: myHasPage,
+    isFetchingNextPage: isMyFetchingNextPage,
+  } = usePagination(
+    'myRequest',
+    userId,
+    `/requests/my-request?userId=${userId}`,
+  );
+  
+  const { data=[], fetchNextPage, hasNextPage, isFetchingNextPage } = usePagination(
+      'userRequest',
+       userId,
+      `/requests/user-request?userId=${userId}`,
+  );
+  
+  useEffect(() => {
+    if (inView && hasNextPage) {
+      fetchNextPage()
+    }
+    if (inView && myHasPage) {
+      myNextPage()
+    }
+  }, [inView, fetchNextPage, hasNextPage, myHasPage, myNextPage])
+  
+  console.log(inView)
+
+  const myRequests = sentRequest?.pages?.flatMap(page=>page.result) || [];
+  const userRequests = data?.pages?.flatMap(page => page.result) || [];
+  
+  // console.log(sentRequest)
 
   const handleDelete = (id, type) => {
     Swal.fire({
@@ -122,30 +160,62 @@ const RequestList = ({ setShowSidebar }) => {
       <div className="space-y-3 transition-all duration-500 ease-in-out">
         {requestTab === 'user-request' ? (
           userRequests.length > 0 ? (
-            userRequests.map(req => (
+            <div className=" overflow-y-auto custom-scrollbar">
+              {userRequests.map(req => (
+                <div
+                  key={req._id}
+                  className="animate-in fade-in slide-in-from-bottom-2 duration-300"
+                >
+                  <UserRequest
+                    handleDelete={handleDelete}
+                    handleAccept={handleAccept}
+                    req={req}
+                  />
+                </div>
+              ))}
               <div
-                key={req._id}
-                className="animate-in fade-in slide-in-from-bottom-2 duration-300"
+                ref={ref}
+                className="h-14 flex items-center justify-center w-full"
               >
-                <UserRequest
-                  handleDelete={handleDelete}
-                  handleAccept={handleAccept}
-                  req={req}
-                />
+                {isFetchingNextPage && (
+                  <div className="flex items-center gap-2">
+                    <div className="w-4 h-4 border-2 border-white/20 border-t-white animate-spin rounded-full"></div>
+                    <span className="text-xs text-white/60">
+                      Loading more...
+                    </span>
+                  </div>
+                )}
               </div>
-            ))
+            </div>
           ) : (
             <EmptyState message="No incoming requests yet." />
           )
         ) : myRequests.length > 0 ? (
-          myRequests.map(myReq => (
+          <div className="overflow-y-auto custom-scrollbar">
+            {myRequests.map(myReq => (
+              <div
+                key={myReq._id}
+                className="animate-in fade-in slide-in-from-bottom-2 duration-300"
+              >
+                <MyRequest
+                  handleDelete={handleDelete}
+                  setShowSidebar={setShowSidebar}
+                  myReq={myReq}
+                />
+              </div>
+            ))}
             <div
-              key={myReq._id}
-              className="animate-in fade-in slide-in-from-bottom-2 duration-300"
+              ref={ref}
+              className="h-14 flex items-center justify-center w-full"
             >
-              <MyRequest handleDelete={handleDelete} setShowSidebar={setShowSidebar} myReq={myReq} />
+              {isMyFetchingNextPage && (
+                <div className="flex items-center gap-2">
+                  <div className="w-4 h-4 border-2 border-white/20 border-t-white animate-spin rounded-full"></div>
+                  <span className="text-xs text-white/60">Loading more...</span>
+                </div>
+              )}
             </div>
-          ))
+          </div>
         ) : (
           <EmptyState message="You haven't sent any requests." />
         )}

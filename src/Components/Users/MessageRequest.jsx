@@ -3,8 +3,13 @@ import React from 'react';
 import { Check, X, UserPlus } from 'lucide-react';
 import { useChat } from '@/Context/ChatProvider';
 
-const MessageRequest = ({ megRef, messageReq = [], handleMegAcDe }) => {
-  
+const MessageRequest = ({
+  megRef,
+  messageReq = [],
+  handleMegAcDe,
+  ref,
+  isReqNext,
+}) => {
   return (
     <dialog ref={megRef} className="modal modal-bottom sm:modal-middle">
       <div className="modal-box bg-[#001E3C] border border-blue-400/20 p-0 overflow-hidden shadow-2xl">
@@ -27,11 +32,11 @@ const MessageRequest = ({ megRef, messageReq = [], handleMegAcDe }) => {
         </div>
 
         {/* Request List */}
-        <div className="max-h-[400px] overflow-y-auto">
+        <div className="max-h-[400px] overflow-y-auto custom-scrollbar">
           {messageReq.length > 0 ? (
-            messageReq.map(chat => (
+            messageReq.map((chat,i) => (
               <div
-                key={chat?._id}
+                key={chat?._id || i}
                 className="flex items-center justify-between px-6 py-5 border-b border-blue-400/10 hover:bg-white/5 transition-all group"
               >
                 <div className="flex items-center gap-4 flex-1 min-w-0">
@@ -42,10 +47,14 @@ const MessageRequest = ({ megRef, messageReq = [], handleMegAcDe }) => {
                         src={chat?.image || 'https://i.pravatar.cc/100?u=rahim'}
                         className="object-cover"
                         alt={chat?.name || 'user'}
-                        fill
+                        width={48}
+                        height={48}
                       />
                     </div>
-                  
+                    <div
+                      ref={ref}
+                      className="h-14 flex items-center justify-center w-full"
+                    ></div>
                   </div>
 
                   {/* Text Content */}
@@ -55,7 +64,7 @@ const MessageRequest = ({ megRef, messageReq = [], handleMegAcDe }) => {
                         {chat?.name}
                       </p>
                       <span className="text-[10px] text-blue-300/50 font-medium whitespace-nowrap">
-                        {new Date(chat.lastSeen).toLocaleDateString()}
+                        {new Date(chat?.lastSeen).toLocaleDateString()}
                       </span>
                     </div>
                     <p className="text-xs text-blue-100/60 truncate mt-0.5 italic">
@@ -91,6 +100,12 @@ const MessageRequest = ({ megRef, messageReq = [], handleMegAcDe }) => {
               <p className="text-blue-100/40 text-sm">
                 No pending requests at the moment
               </p>
+            </div>
+          )}
+          {isReqNext && (
+            <div className="flex items-center gap-2">
+              <div className="w-4 h-4 border-2 border-white/20 border-t-white animate-spin rounded-full"></div>
+              <span className="text-xs text-white/60">Loading more...</span>
             </div>
           )}
         </div>

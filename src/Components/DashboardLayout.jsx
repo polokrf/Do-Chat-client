@@ -29,6 +29,7 @@ import ChatBox from './Users/ChatBox';
 import socket from '@/lib/socket';
 import MessageRequest from './Users/MessageRequest';
 import { useInView } from 'react-intersection-observer';
+import { usePagination } from '@/Hooks/usePagination';
 
 const DashboardLayout = () => {
   const [showSidebar, setShowSidebar] = useState(false);
@@ -77,25 +78,27 @@ const DashboardLayout = () => {
     });
 
 
+  
+  
+  
+  // get message request
+  const { data:receiveMessage =[] ,fetchNextPage:reqFetchNext,hasNextPage:hasReqNext,isFetchingNextPage:isReqNext} = usePagination(
+    'messageReq',
+    userId,
+    `/chats/message-request-list?userId=${userId}`,
+  )
+
   useEffect(() => {
     if (inView && hasNextPage) {
       fetchNextPage()
     }
-  }, [inView, hasNextPage, fetchNextPage])
-  
-  const users = data?.pages?.flatMap(page => page.users) || [];
-  
-  // get message request
-  const { data: messageReq=[] } = useQuery({
-    queryKey: ['messageReq', userId],
-    enabled: !!userId,
-    queryFn: async () => {
-      const res = await axiosInstance.get(`/chats/message-request-list?userId=${userId}`);
-      return res.data
+    if (inView && hasReqNext) {
+      reqFetchNext()
     }
-  })
-
- 
+  }, [inView, hasNextPage, fetchNextPage,hasReqNext,reqFetchNext])
+  
+const users = data?.pages?.flatMap(page => page.users) || [];
+ const messageReq= receiveMessage?.pages?.flatMap(page=>page.users) || []
 
   const handleRequestMeg = () => {
     megRef.current.showModal();
@@ -300,6 +303,8 @@ const DashboardLayout = () => {
               <MessageRequest
                 messageReq={messageReq}
                 megRef={megRef}
+                ref={ref}
+                isReqNext={isReqNext}
                 handleMegAcDe={handleMegAcDe}
               />
             </div>
