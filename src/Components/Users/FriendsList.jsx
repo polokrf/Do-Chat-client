@@ -62,10 +62,10 @@ const FriendsList = ({ setShowSidebar }) => {
   
   return (
     <div className="p-3 overflow-y-auto custom-scrollbar">
-      {friends.map(friend => (
+      {friends.map((friend,i) => (
         <FriendListCard
           userId={userId}
-          key={friend._id}
+          key={friend?._id || i}
           friend={friend}
           setShowSidebar={setShowSidebar}
           handleDelete={handleDelete}

@@ -3,10 +3,10 @@ import React, { useEffect, useRef, useState } from 'react';
 import {
   Menu,
  
-  Phone,
+ 
   Send,
   Smile,
-  Video,
+  
  
 } from 'lucide-react';
 import { useChat } from '@/Context/ChatProvider';
@@ -19,6 +19,7 @@ import socket from '@/lib/socket';
 import { useInView } from 'react-intersection-observer';
 import Typing from './Typing';
 
+
 const ChatBox = ({ setShowSidebar }) => {
   const { selectChat, setSelectChat, liveChat, setLiveChat, isOnline } = useChat();
   const [typingUser, setTypingUser] = useState(null);
@@ -26,9 +27,8 @@ const ChatBox = ({ setShowSidebar }) => {
   const axiosInstance = useAxios();
   const { data: session, status } = useSession();
   const userId = session?.user?.userId;
-  const {ref,inView}=useInView()
-  
-  
+  const { ref, inView } = useInView()
+ 
   
 
  
@@ -196,6 +196,7 @@ const ChatBox = ({ setShowSidebar }) => {
       </div>
     );
   }
+  console.log(isOnline);
 
   return (
     <main className="flex-1 flex flex-col min-h-0 min-w-0 bg-[#FDFDFD]">
@@ -218,7 +219,8 @@ const ChatBox = ({ setShowSidebar }) => {
                 width={50}
               />
             </div>
-            {isOnline[chatUser?._id] === 'online' && (
+            
+            {isOnline[chatUser?._id] === true && (
               <div className="absolute bottom-0 right-0 w-3.5 h-3.5 bg-green-500 border-2 border-white rounded-full shadow-sm"></div>
             )}
           </div>
@@ -227,15 +229,6 @@ const ChatBox = ({ setShowSidebar }) => {
               {name || 'User'}
             </h2>
           </div>
-        </div>
-
-        <div className="flex gap-3">
-          <button className="p-3 bg-gray-50 rounded-full text-gray-600 hover:bg-blue-50 hover:text-blue-600 transition-all cursor-pointer shadow-sm border border-gray-100">
-            <Phone className="w-4 h-4" />
-          </button>
-          <button className="p-3 bg-gray-50 rounded-full text-gray-600 hover:bg-blue-50 hover:text-blue-600 transition-all cursor-pointer shadow-sm border border-gray-100">
-            <Video className="w-4 h-4" />
-          </button>
         </div>
       </header>
       {/* Chat Messages */}
@@ -296,9 +289,8 @@ const ChatBox = ({ setShowSidebar }) => {
           );
         })}
 
-        {typingUser === chatUser?._id && (
-         <Typing chatUser={chatUser}></Typing>
-        )}
+        {/* typing include */}
+        {typingUser === chatUser?._id && <Typing chatUser={chatUser}></Typing>}
       </div>
 
       {/* Footer Input */}

@@ -9,16 +9,33 @@ export const ChatProvider = ({ children }) => {
   const [isOnline, setIsOnline] = useState({});
 
   useEffect(() => {
+    socket.on('all-users', userIds => {
+      const map = {};
+       userIds.forEach(id => {
+         map[id] = true;
+       });
+       setIsOnline(map);
+     });
+    
     socket.on('user-status', ({ userId, status }) => {
-      setIsOnline(prev => ({
-        ...prev,
-        [userId]:status
-      }))
+      setIsOnline(prev => {
+        const updated = { ...prev };
 
-      // console.log(userId,status)
+        if (status === 'online') {
+          updated[userId] = true;
+        } else {
+          delete updated[userId];
+        }
+
+        return updated;
+      });
     });
 
-    return ()=>socket.off('user-status')
+
+    return () => {
+      socket.off('user-status')
+      socket.off('all-users')
+    }
   },[])
 
   return (

@@ -185,14 +185,14 @@ const users = data?.pages?.flatMap(page => page.users) || [];
                   width={50}
                   className="w-11 h-11 object-cover rounded-full border-2 border-white/20"
                 />
-                {isOnline[userId] === 'online' && (
+                {isOnline[userId] === true && (
                   <div className="absolute bottom-0 right-0 w-3 h-3 bg-[#4CAF50] border-2 border-[#3B5998] rounded-full"></div>
                 )}
               </div>
               <div className="text-white">
                 <p className="font-semibold text-sm">{name}</p>
                 <p className="text-[10px] text-[#4CAF50] uppercase tracking-widest">
-                  {isOnline[userId] === 'online' ? 'online' : 'offline'}
+                  {isOnline[userId] === true ? 'online' : 'offline'}
                 </p>
               </div>
             </div>

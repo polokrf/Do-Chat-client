@@ -26,7 +26,7 @@ const FriendListCard = ({ friend, handleDelete, setShowSidebar }) => {
             width={48}
           />
           {/* Online Status Badge */}
-          {isOnline[targetId] === 'online' && (
+          {isOnline[targetId] === true && (
             <span className="absolute bottom-0.5 right-0.5 w-3 h-3 bg-green-500 border-2 border-white rounded-full shadow-sm"></span>
           )}
         </div>

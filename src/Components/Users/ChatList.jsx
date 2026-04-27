@@ -60,7 +60,7 @@ const ChatList = ({ setShowSidebar }) => {
               height={50}
               width={50}
             />
-            {isOnline[chat._id] === 'online' && (
+            {isOnline[chat._id] === true && (
               <div className="absolute bottom-0 right-0 w-3 h-3 bg-[#4CAF50] border-2 border-[#415D9B] rounded-full"></div>
             )}
           </div>
