@@ -1,6 +1,6 @@
 'use client';
 import Link from 'next/link';
-import React from 'react';
+import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { signIn } from 'next-auth/react';
 import toast from 'react-hot-toast';
@@ -10,9 +10,11 @@ import { useRouter } from 'next/navigation';
 const Login = () => {
   const { handleSubmit, register } = useForm();
   const router = useRouter();
+  const [loading, setLoading] = useState(false);
 
   const handleLogin = async loginData => {
     try {
+      setLoading(true)
       const res = await signIn('credentials', {
         redirect: false,
         email: loginData.email,
@@ -26,6 +28,8 @@ const Login = () => {
       }
     } catch (error) {
       console.log(error);
+    } finally {
+      setLoading(false)
     }
   };
 
@@ -91,8 +95,15 @@ const Login = () => {
             </div>
           </div>
 
-          <button className="btn w-full bg-[#3B5998] hover:bg-[#2d4373] text-white border-none rounded-xl h-12 shadow-lg shadow-[#3B5998]/30 transition-all text-base font-bold">
-            Log In
+          <button
+            disabled={loading}
+            className="btn w-full bg-[#3B5998] hover:bg-[#2d4373] text-white border-none rounded-xl h-12 shadow-lg shadow-[#3B5998]/30 transition-all duration-300 active:scale-95 disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center text-base font-bold"
+          >
+            {loading ? (
+              <div className="w-6 h-6 border-4 border-white/30 border-t-white rounded-full animate-spin"></div>
+            ) : (
+              'Log In'
+            )}
           </button>
         </form>
 

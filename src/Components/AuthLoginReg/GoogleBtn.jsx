@@ -1,17 +1,27 @@
-import React from 'react';
+import React, { useState } from 'react';
 
 import { signIn } from 'next-auth/react';
 
 
 const GoogleBtn = () => {
-  const handleGoogle = async() => {
-   await signIn('google', { callbackUrl: '/dashboard' });
-    
-  }
+  const [googleLoading, setGoogleLoading] = useState(false);
+  const handleGoogle = async () => {
+    try {
+      setGoogleLoading(true);
+
+      await signIn('google', {
+        callbackUrl: '/dashboard',
+      });
+    } catch (error) {
+      console.log(error);
+      toast.error('Google login failed');
+      setGoogleLoading(false);
+    }
+  };
   return (
     <div>
       {/* Google */}
-      <button onClick={handleGoogle} className="btn mt-3 w-full bg-white text-black border-[#e5e5e5]">
+      <button onClick={handleGoogle} className="btn mt-3 w-full bg-white text-black border-[#e5e5e5]" disabled={googleLoading}>
         <svg
           aria-label="Google logo"
           width="16"

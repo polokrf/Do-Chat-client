@@ -18,6 +18,7 @@ import toast from 'react-hot-toast';
 import socket from '@/lib/socket';
 import { useInView } from 'react-intersection-observer';
 import Typing from './Typing';
+import ChatListSkeleton from '../SkeletonLoader/SkeletonLoader';
 
 
 const ChatBox = ({ setShowSidebar }) => {
@@ -83,7 +84,7 @@ const ChatBox = ({ setShowSidebar }) => {
         ((data._id = Date.now().toString()),
           setLiveChat(prev => [...prev, data]));
       }
-      // console.log(data)
+      console.log(data)
     };
 
     socket.on('receiveMessage', handleReceive);
@@ -106,9 +107,12 @@ const ChatBox = ({ setShowSidebar }) => {
         message,
       };
 
-      socket.emit('sendMessage', body);
+       socket.emit('sendMessage', body);
+      
       const res = await axiosInstance.post('/chats/send-message', body);
+      
       setLiveChat(prev => [...prev, res.data]);
+     
       e.target.reset();
     } catch (error) {
       console.log(error);
@@ -141,10 +145,10 @@ const ChatBox = ({ setShowSidebar }) => {
   useEffect(() => {
 
     const handleTyping = ({ senderId }) => {
-        if (senderId === chatUser?._id) {
-          setTypingUser(senderId);
-        }
-       console.log('typing', senderId);
+      if (senderId === chatUser?._id) {
+        setTypingUser(senderId);
+      }
+      console.log('typing', senderId);
     };
     const handleTypingStop = ({ senderId }) => {
       if (senderId === chatUser?._id) {
@@ -156,17 +160,23 @@ const ChatBox = ({ setShowSidebar }) => {
     socket.on('stopTyping', handleTypingStop)
     
     return () => {
-        socket.off('typing', handleTyping);
-        socket.off('stopTyping', handleTypingStop);
+      socket.off('typing', handleTyping);
+      socket.off('stopTyping', handleTypingStop);
     }
-  },[chatUser])
+  }, [chatUser]);
+
+  
+
+  
+
+  
 
   const { image, name} = chatUser;
   
 
 
   if (status === 'loading') {
-    return <p>loading...</p>;
+    return <ChatListSkeleton/>
   }
 
   if (!selectChat) {
@@ -196,7 +206,7 @@ const ChatBox = ({ setShowSidebar }) => {
       </div>
     );
   }
-  console.log(isOnline);
+  // console.log(isOnline);
 
   return (
     <main className="flex-1 flex flex-col min-h-0 min-w-0 bg-[#FDFDFD]">
@@ -280,7 +290,7 @@ const ChatBox = ({ setShowSidebar }) => {
                   </span>
                   {isMe && (
                     <span className="text-[10px] text-blue-500 font-bold opacity-0 group-hover:opacity-100 transition-opacity">
-                      • Read
+                      {message?.status}
                     </span>
                   )}
                 </div>

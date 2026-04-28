@@ -15,6 +15,7 @@ import toast from 'react-hot-toast';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import Swal from 'sweetalert2';
 import { useChat } from '@/Context/ChatProvider';
+import socket from '@/lib/socket';
 
 const UsersCard = ({ user, isLoading, setShowSidebar }) => {
   const { name, image, _id: targetId, email: targetEmail } = user || {};
@@ -60,6 +61,14 @@ const UsersCard = ({ user, isLoading, setShowSidebar }) => {
 
   const handleAddFnd = async id => {
     try {
+      const newNotification = {
+        senderId: userId,
+        receiverId: id,
+        url: `/dashboard?tab=requests`,
+        message: 'sent a new friend Request',
+        type: 'friend request',
+      };
+      socket.emit('sentNotification', newNotification);
       const friendRequests = { senderId: userId, receiverId: id };
       const res = await axiosInstance.post('/friendRequests', friendRequests);
       
@@ -111,11 +120,20 @@ const UsersCard = ({ user, isLoading, setShowSidebar }) => {
 
   const handleAccept = async id => {
     try {
+      const newNotification = {
+        senderId: userId,
+        receiverId: id,
+        url: `/dashboard?tab=friends`,
+        message: 'accept a friend Request',
+        type: 'accept friend request',
+      };
+      socket.emit('sentNotification', newNotification);
       await axiosInstance.patch(`/friendRequests/accept`, {
         userId,
         targetId: id,
       });
       toast.success(`New friend: ${name}`);
+      
       queryClient.invalidateQueries(['friends', 'received']);
     } catch (error) {
       console.log(error);

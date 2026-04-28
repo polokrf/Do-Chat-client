@@ -9,6 +9,7 @@ import toast from 'react-hot-toast';
 import { useChat } from '@/Context/ChatProvider';
 import { usePagination } from '@/Hooks/usePagination';
 import { useInView } from 'react-intersection-observer';
+import socket from '@/lib/socket';
 
 const RequestList = ({ setShowSidebar }) => {
   const [requestTab, setRequestTab] = useState('user-request');
@@ -18,29 +19,7 @@ const RequestList = ({ setShowSidebar }) => {
   const userId = session?.data?.user?.userId;
   const { ref, inView}=useInView()
 
-  // const { data:myRequests =[]} = useQuery({
-  //   queryKey: ['myRequest', userId],
-  //   enabled: !!userId,
-  //   queryFn: async () => {
-  //     const res = await axiosInstance.get(
-  //       `/requests/my-request?userId=${userId}`,
-  //     );
-  //     return res.data;
-  //   },
-  // });
-
-  // const { data: userRequests = [] } = useQuery({
-  //   queryKey: ['userRequest', userId],
-  //   enabled: !!userId,
-  //   queryFn: async () => {
-  //     const res = await axiosInstance.get(
-  //       `/requests/user-request?userId=${userId}`,
-  //     );
-  //     return res.data;
-  //   },
-  // });
-
-  // set pagination and get data use tanStack Query
+  
 
   const {
     data: sentRequest =[],
@@ -72,6 +51,8 @@ const RequestList = ({ setShowSidebar }) => {
 
   const myRequests = sentRequest?.pages?.flatMap(page=>page.result) || [];
   const userRequests = data?.pages?.flatMap(page => page.result) || [];
+
+  console.log(userRequests)
   
   // console.log(sentRequest)
 
@@ -105,11 +86,19 @@ const RequestList = ({ setShowSidebar }) => {
 
   const handleAccept = async id => {
     try {
-      const res = await axiosInstance.patch(`/friendRequests/accept`, {
+      const newNotification = {
+        senderId:userId,
+        receiverId:id,
+        url: `/dashboard?tab=friends`,
+        message:'accept a friend Request',
+        type: 'accept friend request',
+      };
+      socket.emit('sentNotification', newNotification);
+     const res = await axiosInstance.patch(`/friendRequests/accept`, {
         userId,
         targetId: id,
       });
-      console.log(res);
+      
       toast.success(`your new friend`);
       queryClient.invalidateQueries(['userRequest']);
     } catch (error) {
@@ -128,7 +117,7 @@ const RequestList = ({ setShowSidebar }) => {
         <div className="flex gap-4 text-sm font-medium">
           <button
             onClick={() => setRequestTab('user-request')}
-            className={`relative pb-2 transition-colors duration-300 ${
+            className={`relative pb-2 transition-colors duration-300 cursor-pointer ${
               requestTab === 'user-request'
                 ? 'text-white'
                 : 'text-white/40 hover:text-white/70'
@@ -142,7 +131,7 @@ const RequestList = ({ setShowSidebar }) => {
 
           <button
             onClick={() => setRequestTab('my-request')}
-            className={`relative pb-2 transition-colors duration-300 ${
+            className={`relative pb-2 transition-colors duration-300 cursor-pointer ${
               requestTab === 'my-request'
                 ? 'text-white'
                 : 'text-white/40 hover:text-white/70'

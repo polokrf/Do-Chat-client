@@ -35,7 +35,7 @@ const ChatList = ({ setShowSidebar }) => {
   
   
 
-
+//  console.log(chatList)
 
   const handleChat = (id) => {
 
@@ -49,7 +49,7 @@ const ChatList = ({ setShowSidebar }) => {
       {chatList.map((chat, i) => (
         <div
           onClick={() => handleChat(chat?._id)}
-          key={chat?._id || i}
+          key={i}
           className="bg-white/10 px-6 py-4 flex items-center gap-3 cursor-pointer rounded-xl"
         >
           <div className="relative">

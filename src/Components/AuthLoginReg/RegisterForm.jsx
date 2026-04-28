@@ -3,63 +3,72 @@ import { useAxios } from '@/Hooks/useAxios';
 import axios from 'axios';
 import { useSession } from 'next-auth/react';
 import Link from 'next/link';
-import React from 'react';
+import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
 import { signIn } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 
 const RegisterForm = () => {
-  const { handleSubmit, register, reset } = useForm();
+  const {
+    handleSubmit,
+    register,
+    reset,
+    formState: { errors },
+  } = useForm();
   const axiosInstance = useAxios();
-   const router=useRouter()
+  const router = useRouter()
+  const [loading, setLoading] = useState(false);
  
   
   const handleRegister = async (data) => {
     try {
+      setLoading(true);
       if (!data.email) {
-            return 
+        return;
       }
       if (!data.password) {
-            return 
+        return;
       }
       const imageFile = data.image[0];
       const formData = new FormData();
-      formData.append('image',imageFile);
+      formData.append('image', imageFile);
       const imgBBURL = process.env.NEXT_PUBLIC_IMGBB_API_URL;
       // hosting to imagBB
-      const resImg = await axios.post(imgBBURL, formData)
-      const imageUrl = resImg.data.data.url
+      const resImg = await axios.post(imgBBURL, formData);
+      const imageUrl = resImg.data.data.url;
       // register user data save in data base
-      const res = await  axiosInstance.post('/auth/register', {
-            ...data,
-            image: imageUrl,
-            authProvider: 'credentials',
-          })
-          
+      const res = await axiosInstance.post('/auth/register', {
+        ...data,
+        image: imageUrl,
+        authProvider: 'credentials',
+      });
+
       // complete  register then auto login
-         if (res.data?.insertedId) {
-            
-              const resLogin = await signIn('credentials', {
-                redirect: false,
-                email: data.email,
-                password: data.password,
-              });
-              if (resLogin?.ok) {
-                toast.success('Register success');
-                router.push('/dashboard')
-              }
-              // console.log(resLogin)
-            }
-         
-      
+      if (res.data?.insertedId) {
+        const resLogin = await signIn('credentials', {
+          redirect: false,
+          email: data.email,
+          password: data.password,
+        });
+        if (resLogin?.ok) {
+          toast.success('Register success');
+          router.push('/dashboard');
+        }
+        // console.log(resLogin)
+      }
     } catch (error) {
-      console.log(error)
+      console.log(error);
+    } finally {
+      setLoading(false)
     }
   }
   return (
     <div>
-      <form onSubmit={handleSubmit(handleRegister)} className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-5  ">
+      <form
+        onSubmit={handleSubmit(handleRegister)}
+        className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-5  "
+      >
         <div className="form-control w-full md:col-span-2">
           <label className="label text-sm font-bold text-slate-600">
             Full Name
@@ -67,7 +76,7 @@ const RegisterForm = () => {
           <input
             type="text"
             placeholder="John Doe"
-            {...register('name',{required:true})}
+            {...register('name', { required: true })}
             className="input input-bordered h-12 w-full bg-slate-50 border-slate-200 focus:border-[#3B5998] focus:ring-4 focus:ring-[#3B5998]/10 transition-all rounded-xl outline-none"
           />
         </div>
@@ -84,7 +93,7 @@ const RegisterForm = () => {
             </div>
             <input
               type="file"
-              {...register('image',{required:true})}
+              {...register('image', { required: true })}
               className="absolute inset-0 opacity-0 cursor-pointer"
             />
           </div>
@@ -96,7 +105,7 @@ const RegisterForm = () => {
           </label>
           <input
             type="email"
-            {...register('email',{required:true})}
+            {...register('email', { required: true })}
             placeholder="name@company.com"
             className="input input-bordered h-12 w-full bg-slate-50 border-slate-200 focus:border-[#3B5998] focus:ring-4 focus:ring-[#3B5998]/10 transition-all rounded-xl outline-none"
           />
@@ -109,14 +118,31 @@ const RegisterForm = () => {
           <input
             type="password"
             placeholder="••••••••"
-            {...register('password',{required:true})}
+            {...register('password', {
+              required: true,
+              minLength: 6,
+              maxLength: 8,
+            })}
             className="input input-bordered h-12 w-full bg-slate-50 border-slate-200 focus:border-[#3B5998] focus:ring-4 focus:ring-[#3B5998]/10 transition-all rounded-xl outline-none"
           />
+          {/* Show error */}
+          {errors.password?.type === 'minLength' && (
+            <p role="alert" className=" text-rose-600">
+              Password must be at least 6 characters
+            </p>
+          )}
         </div>
 
         <div className="md:col-span-2 mt-2">
-          <button className="btn w-full bg-[#3B5998] hover:bg-[#2d4373] text-white border-none rounded-xl h-14 shadow-lg shadow-[#3B5998]/20 transition-all text-lg font-bold">
-            Register Now
+          <button
+            disabled={loading}
+            className="btn w-full bg-[#3B5998] hover:bg-[#2d4373] text-white border-none rounded-xl h-12 shadow-lg shadow-[#3B5998]/30 transition-all duration-300 active:scale-95 disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center text-base font-bold"
+          >
+            {loading ? (
+              <div className="w-6 h-6 border-4 border-white/30 border-t-white rounded-full animate-spin"></div>
+            ) : (
+              'Register Now'
+            )}
           </button>
         </div>
 

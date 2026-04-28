@@ -13,13 +13,14 @@ import {
   Send,
   LogOut,
   MessageCircle,
-  XCircle, // Added LogOut icon
+  XCircle,
+  BellRing, // Added LogOut icon
 } from 'lucide-react';
 import { useInfiniteQuery, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useAxios } from '@/Hooks/useAxios';
 import UsersCard from './Users/UsersCard';
 import { signOut, useSession } from 'next-auth/react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import Image from 'next/image';
 import ChatList from './Users/ChatList';
 import FriendsList from './Users/FriendsList';
@@ -30,11 +31,12 @@ import socket from '@/lib/socket';
 import MessageRequest from './Users/MessageRequest';
 import { useInView } from 'react-intersection-observer';
 import { usePagination } from '@/Hooks/usePagination';
+import NotificationsModal from './Users/NotificationsModal';
 
 const DashboardLayout = () => {
   const [showSidebar, setShowSidebar] = useState(false);
   const [search, setSearch] = useState('');
-  const [tab,setTab]=useState('chats')
+  // const [tab,setTab]=useState('chats')
   const axiosInstance = useAxios();
   const { selectChat, setSelectChat,isOnline} = useChat();
   const router = useRouter()
@@ -44,20 +46,33 @@ const DashboardLayout = () => {
   const userId = session?.data?.user?.userId
   const megRef = useRef()
   const queryClient = useQueryClient();
-  const {ref,inView}=useInView()
+  const { ref, inView } = useInView();
+  const notificationRef=useRef()
+  const searchParams = useSearchParams();
+  const[notificationLength,setNotificationLength]=useState(null)
+
+  
+  let activeTab = searchParams.get('tab')
   
 
   useEffect(() => {
    
-     if (!userId) return;
-      socket.connect(); 
+      if (!userId) return;
+
+      // first join
       socket.emit('join', userId);
 
-    // console.log('connnect ',userId)
-    
-    return () => {
-      socket.disconnect();
-    }
+      // Reconnect join 
+      const handleReconnect = () => {
+        // console.log('Reconnected join', userId);
+        socket.emit('join', userId);
+      };
+
+      socket.on('connect', handleReconnect);
+
+      return () => {
+        socket.off('connect', handleReconnect);
+      };
     
   },[userId])
 
@@ -102,6 +117,7 @@ const users = data?.pages?.flatMap(page => page.users) || [];
 
   const handleRequestMeg = () => {
     megRef.current.showModal();
+    
   }
 
   const handleMegAcDe = async (id,action) => {
@@ -123,6 +139,13 @@ const users = data?.pages?.flatMap(page => page.users) || [];
     }
   }
 
+  const handleNotifications = () => {
+    notificationRef.current.showModal()
+  }
+
+  const handleTab = (tab) => {
+    router.push(`/dashboard?tab=${tab}`)
+  }
   // Logout Handler (Placeholder)
   const handleLogout = () => {
     signOut();
@@ -130,14 +153,14 @@ const users = data?.pages?.flatMap(page => page.users) || [];
   };
 
   const tabList = () => {
-    if (tab === 'chats') {
+    if (activeTab === 'chats') {
       return <ChatList setShowSidebar={setShowSidebar} />;
     }
-    if (tab === 'friends') {
+    if (activeTab === 'friends') {
       return <FriendsList setShowSidebar={setShowSidebar} />;
     }
-    if (tab === 'requests') {
-      return <RequestList setShowSidebar={setShowSidebar} />;
+    if (activeTab === 'requests') {
+      return <RequestList activeTab={activeTab} setShowSidebar={setShowSidebar} />;
     }
   }
 
@@ -160,8 +183,21 @@ const users = data?.pages?.flatMap(page => page.users) || [];
           <div className="flex-none p-6">
             <div className="flex items-center justify-between mb-6">
               <div className="flex items-center gap-2">
-                <div className="w-9 h-9 bg-white/20 rounded-full flex items-center justify-center">
-                  <MessageSquare className="w-5 h-5 text-white" />
+                <div
+                  onClick={handleNotifications}
+                  className="relative inline-flex items-center justify-center"
+                >
+                  {/* The Icon Container */}
+                  <button className="group relative p-2 bg-white/10 hover:bg-white/20 rounded-full transition-colors duration-200 cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-white/50">
+                    <BellRing className="w-5 h-5 text-white transition-transform group-hover:rotate-12" />
+
+                    {/* The Notification Badge */}
+                    {notificationLength && (
+                      <span className="absolute top-0 right-0 flex h-4 w-4 transform translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-red-500 text-[10px] font-bold text-white ring-2 ring-gray-900">
+                        {notificationLength}
+                      </span>
+                    )}
+                  </button>
                 </div>
                 <span className="text-white text-xl font-bold tracking-tight">
                   DoChat
@@ -208,7 +244,7 @@ const users = data?.pages?.flatMap(page => page.users) || [];
               />
               <Search className="absolute left-3 top-3 w-4 h-4 text-white/40" />
 
-              <div className=' text-right'>
+              <div className=" text-right">
                 {users.length > 0 && (
                   <button
                     onClick={() => setSearch('')}
@@ -257,20 +293,20 @@ const users = data?.pages?.flatMap(page => page.users) || [];
               <div className="flex flex-col h-full">
                 <div className="flex space-x-6 text-sm font-medium text-white/60 mb-2 border-b border-white/10">
                   <button
-                    onClick={() => setTab('chats')}
-                    className={`pb-3 cursor-pointer ${tab === 'chats' && 'text-white border-b-2 border-white'}`}
+                    onClick={() => handleTab('chats')}
+                    className={`pb-3 cursor-pointer ${activeTab === 'chats' && 'text-white border-b-2 border-white'}`}
                   >
                     Chats
                   </button>
                   <button
-                    onClick={() => setTab('friends')}
-                    className={`pb-3 cursor-pointer ${tab === 'friends' && 'text-white border-b-2 border-white'}`}
+                    onClick={() => handleTab('friends')}
+                    className={`pb-3 cursor-pointer ${activeTab === 'friends' && 'text-white border-b-2 border-white'}`}
                   >
                     Friends
                   </button>
                   <button
-                    onClick={() => setTab('requests')}
-                    className={`pb-3 cursor-pointer ${tab === 'requests' && 'text-white border-b-2 border-white'}`}
+                    onClick={() => handleTab('requests')}
+                    className={`pb-3 cursor-pointer ${activeTab === 'requests' && 'text-white border-b-2 border-white'}`}
                   >
                     Requests
                   </button>
@@ -322,6 +358,12 @@ const users = data?.pages?.flatMap(page => page.users) || [];
         {/* Main Content Area */}
         <ChatBox setShowSidebar={setShowSidebar} />
       </div>
+      {/* notification modal  */}
+      <NotificationsModal
+        setNotificationLength={setNotificationLength}
+        notificationRef={notificationRef}
+        userId={userId}
+      />
     </div>
   );
 };
