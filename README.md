@@ -94,7 +94,7 @@ Sometimes users disconnected due to network issues, and reconnecting failed to r
 ## 📦 Installation & Setup
 
 ```bash
-git clone https://github.com/your-username/DoChat.git
+git clone https://github.com/polokrf/Do-Chat-client.git
 cd DoChat
 npm install
 npm run dev
