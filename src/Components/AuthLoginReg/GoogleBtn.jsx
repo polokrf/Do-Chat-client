@@ -21,7 +21,7 @@ const GoogleBtn = () => {
   return (
     <div>
       {/* Google */}
-      <button onClick={handleGoogle} className="btn mt-3 w-full bg-white text-black border-[#e5e5e5]" disabled={googleLoading}>
+      <button disabled={googleLoading} onClick={handleGoogle} className="btn mt-3 w-full bg-white text-black border-[#e5e5e5]" disabled={googleLoading}>
         <svg
           aria-label="Google logo"
           width="16"
