@@ -5,13 +5,15 @@ import React, { useEffect } from 'react';
 import FriendListCard from './FriendListCard';
 import Swal from 'sweetalert2';
 import { useInView } from 'react-intersection-observer';
+import { useChat } from '@/Context/ChatProvider';
 
 const FriendsList = ({ setShowSidebar }) => {
   const axiosInstance = useAxios();
   const queryClient = useQueryClient();
   const session = useSession();
   const userId = session?.data?.user?.userId;
-  const {ref,inView} = useInView()
+  const { ref, inView } = useInView();
+  const {isLoading,setIsLoading}=useChat()
   const { data ,fetchNextPage,hasNextPage,isFetchingNextPage} = useInfiniteQuery({
     queryKey: ['myFriends', userId],
     enabled: !!userId,
@@ -42,6 +44,7 @@ const FriendsList = ({ setShowSidebar }) => {
       confirmButtonText: `Yes, ${type} it!`,
     }).then(async result => {
       try {
+        setIsLoading(true)
         const res = await axiosInstance.delete(
           `/friendRequests/delete?targetId=${id}`,
         );
@@ -52,6 +55,7 @@ const FriendsList = ({ setShowSidebar }) => {
             icon: 'success',
           });
         queryClient.invalidateQueries(['myFriends']);
+        setIsLoading(false)
       } catch (error) {
         console.log(error);
       }
@@ -69,6 +73,7 @@ const FriendsList = ({ setShowSidebar }) => {
           friend={friend}
           setShowSidebar={setShowSidebar}
           handleDelete={handleDelete}
+          isLoading={isLoading}
         ></FriendListCard>
       ))}
 

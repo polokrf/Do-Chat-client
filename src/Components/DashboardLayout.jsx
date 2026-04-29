@@ -113,7 +113,8 @@ const DashboardLayout = () => {
   }, [inView, hasNextPage, fetchNextPage,hasReqNext,reqFetchNext])
   
 const users = data?.pages?.flatMap(page => page.users) || [];
- const messageReq= receiveMessage?.pages?.flatMap(page=>page.users) || []
+  const messageReq = receiveMessage?.pages?.flatMap(page => page.users) || []
+  
 
   const handleRequestMeg = () => {
     megRef.current.showModal();
@@ -333,7 +334,7 @@ const users = data?.pages?.flatMap(page => page.users) || [];
               >
                 <MessageCircle className="w-5 h-5" />
                 <span className="absolute top-2 right-2 flex h-4 w-4 items-center justify-center bg-red-500 text-[10px] font-bold text-white rounded-full ring-2 ring-[#3B5998]">
-                  {messageReq.length}
+                  {messageReq.length -1}
                 </span>
               </button>
               <MessageRequest

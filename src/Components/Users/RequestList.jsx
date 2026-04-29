@@ -17,7 +17,8 @@ const RequestList = ({ setShowSidebar }) => {
   const queryClient = useQueryClient();
   const session = useSession();
   const userId = session?.data?.user?.userId;
-  const { ref, inView}=useInView()
+  const { ref, inView } = useInView()
+  const { isLoading, setIsLoading } =useChat()
 
   
 
@@ -52,7 +53,7 @@ const RequestList = ({ setShowSidebar }) => {
   const myRequests = sentRequest?.pages?.flatMap(page=>page.result) || [];
   const userRequests = data?.pages?.flatMap(page => page.result) || [];
 
-  console.log(userRequests)
+  // console.log(userRequests)
   
   // console.log(sentRequest)
 
@@ -67,6 +68,7 @@ const RequestList = ({ setShowSidebar }) => {
       confirmButtonText: `Yes, ${type} it!`,
     }).then(async result => {
       try {
+        setIsLoading(true)
         const res = await axiosInstance.delete(
           `/friendRequests/delete?targetId=${id}`,
         );
@@ -78,6 +80,7 @@ const RequestList = ({ setShowSidebar }) => {
           });
         queryClient.invalidateQueries(['userRequest']);
         queryClient.invalidateQueries(['myRequest']);
+        setIsLoading(false)
       } catch (error) {
         console.log(error);
       }
@@ -86,6 +89,7 @@ const RequestList = ({ setShowSidebar }) => {
 
   const handleAccept = async id => {
     try {
+      setIsLoading(true)
       const newNotification = {
         senderId:userId,
         receiverId:id,
@@ -101,6 +105,7 @@ const RequestList = ({ setShowSidebar }) => {
       
       toast.success(`your new friend`);
       queryClient.invalidateQueries(['userRequest']);
+      setIsLoading(false)
     } catch (error) {
       console.log(error);
     }
@@ -158,6 +163,7 @@ const RequestList = ({ setShowSidebar }) => {
                   <UserRequest
                     handleDelete={handleDelete}
                     handleAccept={handleAccept}
+                    isLoading={isLoading}
                     req={req}
                   />
                 </div>
@@ -189,6 +195,7 @@ const RequestList = ({ setShowSidebar }) => {
                 <MyRequest
                   handleDelete={handleDelete}
                   setShowSidebar={setShowSidebar}
+                  isLoading={isLoading}
                   myReq={myReq}
                 />
               </div>

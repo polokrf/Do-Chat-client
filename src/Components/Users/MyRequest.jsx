@@ -3,7 +3,7 @@ import { MessageCircle, XCircle } from 'lucide-react';
 import Image from 'next/image';
 import React from 'react';
 
-const MyRequest = ({ myReq, handleDelete, setShowSidebar }) => {
+const MyRequest = ({ myReq, handleDelete, setShowSidebar,isLoading }) => {
   const { selectChat, setSelectChat } = useChat();
   const { name, image, _id: targetId } = myReq || {};
 
@@ -50,6 +50,7 @@ const MyRequest = ({ myReq, handleDelete, setShowSidebar }) => {
 
         {/* Cancel Request Button - Secondary Action */}
         <button
+          disabled={isLoading}
           onClick={() => handleDelete(targetId, 'Cancel Request')}
           title="Cancel Request"
           className="flex-1 flex items-center justify-center py-2 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-lg transition-all active:scale-95"

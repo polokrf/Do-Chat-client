@@ -7,6 +7,7 @@ export const ChatProvider = ({ children }) => {
   const [liveChat, setLiveChat] = useState([]);
 
   const [isOnline, setIsOnline] = useState({});
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     socket.on('all-users', userIds => {
@@ -40,7 +41,15 @@ export const ChatProvider = ({ children }) => {
 
   return (
     <ChatContext.Provider
-      value={{ selectChat, setSelectChat, liveChat, setLiveChat,isOnline }}
+      value={{
+        selectChat,
+        setSelectChat,
+        liveChat,
+        setLiveChat,
+        isOnline,
+        isLoading,
+        setIsLoading,
+      }}
     >
       {children}
     </ChatContext.Provider>

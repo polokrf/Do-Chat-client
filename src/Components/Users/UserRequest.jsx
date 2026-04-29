@@ -2,7 +2,7 @@ import { UserCheck, UserRoundX } from 'lucide-react';
 import Image from 'next/image';
 import React from 'react';
 
-const UserRequest = ({ req, handleDelete, handleAccept }) => {
+const UserRequest = ({ req, handleDelete, handleAccept ,isLoading}) => {
   const {name ,image,_id:targetId}=req || {}
   return (
     <div className="bg-white border border-slate-200 rounded-xl shadow-sm my-3 overflow-hidden group transition-all duration-300 hover:border-blue-200">
@@ -35,20 +35,28 @@ const UserRequest = ({ req, handleDelete, handleAccept }) => {
       <div className="flex gap-2 p-3 pt-0">
         {/* Accept Button - Primary Action */}
         <button
+          disabled={isLoading}
           onClick={() => handleAccept(targetId)}
           title="Accept Request"
           className="flex-1 flex cursor-pointer items-center justify-center py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg shadow-sm shadow-blue-100 transition-all active:scale-95"
         >
-          <UserCheck size={20} />
+          {isLoading ? (
+            <div className="w-6 h-6 border-4 border-white/30 border-t-white rounded-full animate-spin"></div>
+          ) : (
+            <UserCheck size={20} />
+          )}
         </button>
 
         {/* Delete Button - Secondary Action */}
         <button
           onClick={() => handleDelete(targetId, 'Delete Request')}
+          disabled={isLoading}
           title="Delete Request"
           className="flex-1 cursor-pointer flex items-center justify-center py-2 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-lg transition-all active:scale-95"
         >
+         
           <UserRoundX size={20} />
+        
         </button>
       </div>
     </div>

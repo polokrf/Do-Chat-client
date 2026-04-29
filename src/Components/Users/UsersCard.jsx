@@ -21,7 +21,7 @@ const UsersCard = ({ user, isLoading, setShowSidebar }) => {
   const { name, image, _id: targetId, email: targetEmail } = user || {};
   const axiosInstance = useAxios();
   const session = useSession();
-  const { setSelectChat } = useChat();
+  const { setSelectChat, isLoading:btnLoading, setIsLoading } = useChat();
   const { userId, email } = session?.data?.user || {};
   const queryClient = useQueryClient();
 
@@ -61,6 +61,7 @@ const UsersCard = ({ user, isLoading, setShowSidebar }) => {
 
   const handleAddFnd = async id => {
     try {
+      setIsLoading(true)
       const newNotification = {
         senderId: userId,
         receiverId: id,
@@ -75,6 +76,7 @@ const UsersCard = ({ user, isLoading, setShowSidebar }) => {
       if (res?.data?.insertedId) toast.success('Request Sent!');
       if (res?.data?.message) toast.error(res?.data?.message);
       queryClient.invalidateQueries(['senderRequest']);
+      setIsLoading(false)
     } catch (error) {
       console.log(error);
     }
@@ -105,12 +107,14 @@ const UsersCard = ({ user, isLoading, setShowSidebar }) => {
     }).then(async result => {
       if (result.isConfirmed) {
         try {
+          setIsLoading(true)
           await axiosInstance.delete(`/friendRequests/delete?targetId=${id}`);
           queryClient.invalidateQueries([
             'senderRequest',
             'received',
             'friends',
           ]);
+          setIsLoading(false)
         } catch (error) {
           console.log(error);
         }
@@ -120,6 +124,7 @@ const UsersCard = ({ user, isLoading, setShowSidebar }) => {
 
   const handleAccept = async id => {
     try {
+      setIsLoading(true)
       const newNotification = {
         senderId: userId,
         receiverId: id,
@@ -135,6 +140,7 @@ const UsersCard = ({ user, isLoading, setShowSidebar }) => {
       toast.success(`New friend: ${name}`);
       
       queryClient.invalidateQueries(['friends', 'received']);
+      setIsLoading(false)
     } catch (error) {
       console.log(error);
     }
@@ -184,9 +190,8 @@ const UsersCard = ({ user, isLoading, setShowSidebar }) => {
             {status === 'friend' && 'Friend'}
             {status === 'sender' && 'Request Sent'}
             {status === 'requester' && 'Sent you a request'}
-            
-            {(status === 'none' && userId !== targetId) && 'Suggested for you'}
-          
+
+            {status === 'none' && userId !== targetId && 'Suggested for you'}
           </p>
         </div>
       </div>
@@ -202,6 +207,7 @@ const UsersCard = ({ user, isLoading, setShowSidebar }) => {
               <MessageCircle size={20} />
             </button>
             <button
+              disabled={btnLoading}
               onClick={() => handleDelete(targetId, 'Unfriend')}
               className="flex-1 cursor-pointer flex justify-center items-center py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg transition-colors active:scale-95"
             >
@@ -219,6 +225,7 @@ const UsersCard = ({ user, isLoading, setShowSidebar }) => {
               <MessageCircle size={20} />
             </button>
             <button
+              disabled={btnLoading}
               onClick={() => handleDelete(targetId, 'Cancel Request')}
               className="flex-1 cursor-pointer flex justify-center items-center py-2 bg-slate-100 hover:bg-slate-200 text-red-500 rounded-lg transition-colors active:scale-95"
             >
@@ -230,12 +237,18 @@ const UsersCard = ({ user, isLoading, setShowSidebar }) => {
         {status === 'requester' && (
           <>
             <button
+              disabled={btnLoading}
               onClick={() => handleAccept(targetId)}
               className="flex-1 cursor-pointer flex justify-center items-center py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors shadow-sm active:scale-95"
             >
-              <UserCheck size={20} />
+              {btnLoading ? (
+                <div className="w-6 h-6 border-4 border-white/30 border-t-white rounded-full animate-spin"></div>
+              ) : (
+                <UserCheck size={20} />
+              )}
             </button>
             <button
+              disabled={btnLoading}
               onClick={() => handleDelete(targetId, 'Delete Request')}
               className="flex-1 cursor-pointer flex justify-center items-center py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg transition-colors active:scale-95"
             >
@@ -247,10 +260,15 @@ const UsersCard = ({ user, isLoading, setShowSidebar }) => {
         {status === 'none' && (
           <>
             <button
+              disabled={btnLoading}
               onClick={() => handleAddFnd(targetId)}
               className={`flex-1 cursor-pointer flex justify-center items-center py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors shadow-sm active:scale-95 ${email === targetEmail ? 'hidden' : 'flex'}`}
             >
-              <UserPlus size={20} />
+              {btnLoading ? (
+                <div className="w-6 h-6 border-4 border-white/30 border-t-white rounded-full animate-spin"></div>
+              ) : (
+                <UserPlus size={20} />
+              )}
             </button>
             <button
               onClick={() => handleChat(targetId)}

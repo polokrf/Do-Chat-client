@@ -309,12 +309,12 @@ const ChatBox = ({ setShowSidebar }) => {
           onSubmit={handleMessage}
           className="w-full md:max-w-6xl mx-auto flex items-center gap-3 bg-gray-50 border border-gray-200 rounded-2xl px-4 py-2 transition-all focus-within:border-blue-300 focus-within:bg-white focus-within:shadow-md"
         >
-          <button
+          {/* <button
             type="button"
             className="p-2 text-gray-400 hover:text-yellow-500 transition-colors cursor-pointer"
           >
             <Smile className="w-6 h-6" />
-          </button>
+          </button> */}
 
           <input
             required

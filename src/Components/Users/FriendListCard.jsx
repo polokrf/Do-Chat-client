@@ -4,7 +4,7 @@ import { MessageCircle, UserMinus } from 'lucide-react';
 import Image from 'next/image';
 import React from 'react';
 
-const FriendListCard = ({ friend, handleDelete, setShowSidebar }) => {
+const FriendListCard = ({ friend, handleDelete, setShowSidebar,isLoading }) => {
   const { selectChat, setSelectChat,isOnline } = useChat();
   const { image, name, _id: targetId } = friend || {};
 
@@ -52,6 +52,7 @@ const FriendListCard = ({ friend, handleDelete, setShowSidebar }) => {
 
         {/* Unfriend Button - Secondary Action */}
         <button
+          disabled={isLoading}
           onClick={() => handleDelete(targetId, 'Unfriend')}
           title="Unfriend"
           className="flex-1 cursor-pointer flex items-center justify-center py-2 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-lg transition-all active:scale-95"
